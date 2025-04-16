@@ -1,13 +1,11 @@
 {
-    "compilerOptions": {
-      "module": "ESNext",
-      "target": "ES2020",
-      "moduleResolution": "node",
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true
-    },
-    "ts-node": {
-      "esm": true
-    }
+  "compilerOptions": {
+    "jsx": "react-jsx",  // Включение поддержки JSX для React
+    "moduleResolution": "node",
+    "target": "ES6",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   }
-  
+}
