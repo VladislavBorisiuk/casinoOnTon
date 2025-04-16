@@ -1,0 +1,190 @@
+/* Убедитесь, что HTML и BODY растягиваются и позволяют скролл */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  background-color: #1a202c; /* Темный фон */
+  overflow-x: hidden; /* Убираем горизонтальный скролл */
+  font-family: 'Roboto', sans-serif;
+  color: #e2e8f0; /* Светлый цвет текста */
+}
+
+/* Основной контейнер приложения */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #1a202c; /* Темный фон */
+  color: #e2e8f0; /* Светлый цвет текста */
+}
+
+/* Центрирование основного контента */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Контент не будет тянуться на весь экран, а начнётся сверху */
+  padding-top: 4rem; /* Увеличиваем отступ сверху, чтобы учесть высоту хедера */
+  padding-bottom: 5rem;
+  flex-grow: 1;
+  width: 100%;
+  max-width: 100%; /* Убедимся, что ширина основного контента не выходит за пределы экрана */
+  color: #e2e8f0; /* Светлый цвет текста */
+}
+
+/* Шапка и навигация */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px; /* Высота заголовка */
+  background-color: #2d3748; /* Темно-серый фон */
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  color: #e2e8f0; /* Светлый цвет текста */
+}
+
+header h1 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #e2e8f0; /* Светлый цвет текста */
+}
+
+header .text-yellow-400 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f6e05e; /* Желтый цвет */
+}
+
+/* Контейнер для рулетки */
+.roulette-bar-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+/* Рулетка */
+.roulette-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 4px solid #f6e05e; /* Желтая рамка */
+  width: 60px;
+  height: 100%;
+}
+
+.roulette-wheel .center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background-color: #f6e05e; /* Желтый фон */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: black; /* Черный текст */
+}
+
+/* Элементы управления ставками */
+.bet-controls {
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #e2e8f0; /* Светлый цвет текста */
+}
+
+.bet-controls select,
+.bet-controls button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  color: #e2e8f0; /* Светлый цвет текста */
+}
+
+/* Стили для select */
+.bet-controls select {
+  background-color: #2d2d2d; /* Темный фон */
+  border: 1px solid #444; /* Тёмно-серая граница */
+  color: white; /* Белый текст */
+}
+
+/* Стили для кнопок */
+.bet-controls button {
+  background-color: #3490dc; /* Синий фон */
+  color: white; /* Белый текст */
+  font-size: 1.125rem;
+  padding: 12px 24px;
+  border-radius: 50px;
+  transition: background-color 0.3s;
+  border: none; /* Убираем стандартную обводку */
+}
+
+.bet-controls button:hover {
+  background-color: #2779bd; /* Темно-синий при наведении */
+}
+
+.bet-controls button:focus,
+.bet-controls button:active {
+  outline: none; /* Убираем стандартный фокус */
+  background-color: #2779bd; /* Темно-синий при фокусе и активации */
+  color: white; /* Белый текст при фокусе и активации */
+}
+
+/* Footer с скрытием */
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #2d3748; /* Темный фон */
+  display: flex;
+  justify-content: space-between; /* Распределяем кнопки равномерно */
+  align-items: center;
+  border-top: 1px solid #4a5568;
+  padding: 8px 4px; /* Убираем лишний отступ */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+nav button {
+  flex-grow: 1; /* Кнопки занимают одинаковую ширину */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-xs;
+  color: #f6e05e; /* Желтый цвет */
+  font-weight: bold;
+  background-color: transparent; /* Прозрачный фон */
+  border: none;
+  padding: 8px 0;
+}
+
+nav button span {
+  margin-top: 4px;
+}
+
+nav button:hover {
+  color: #ecc94b; /* Желтый цвет при наведении */
+}
+
+nav button:focus,
+nav button:active {
+  outline: none;
+  color: #ecc94b; /* Желтый цвет при фокусе и активации */
+}
