@@ -7,10 +7,9 @@ import Modal from './components/Modal';
 import { supabase } from './backend/supabaseClient';
 import TelegramAuth from './components/TelegramAuth';
 import Profile from './components/Profile';
+import CardPackOpener from './components/CardPackOpener';
 
-const Staking = () => (
-  <div className="text-center text-2xl mt-20">📈 Стейкинг скоро будет!</div>
-);
+
 
 
 const getColor = (num: number): 'red' | 'black' | 'green' => {
@@ -40,6 +39,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'game' | 'staking' | 'profile'>('game');
   const [winningNumber, setWinningNumber] = useState<number | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+
+  
+  const Staking = () => (
+    <CardPackOpener balance={balance} setBalance={setBalance} />
+  );
 
   const updateBalanceInDb = async (newBalance: number) => {
     const tg = window.Telegram?.WebApp;
@@ -196,7 +200,7 @@ export default function App() {
   
       <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 py-2 flex border-t border-gray-700 px-4">
         <button onClick={() => setActiveTab('game')} className="flex flex-col items-center text-xs text-yellow-400 font-bold flex-grow text-center">
-          🎰<span className="mt-1">Игра</span>
+          🎰<span className="mt-1">Рулетка</span>
         </button>
         <button onClick={() => setActiveTab('profile')} className="flex flex-col items-center text-xs text-yellow-400 font-bold flex-grow text-center">
           👤<span className="mt-1">Профиль</span>

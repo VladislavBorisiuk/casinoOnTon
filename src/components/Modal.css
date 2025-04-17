@@ -1,73 +1,74 @@
 /* Общие стили для модального окна */
 .modal {
-    position: fixed;              /* фиксированное позиционирование */
-    top: 0;                       /* привязка к верхней части экрана */
-    left: 0;                      /* привязка к левой части экрана */
-    width: 100vw;                 /* ширина на весь экран */
-    height: 100vh;                /* высота на весь экран */
-    background: rgba(0, 0, 0, 0.5); /* полупрозрачный черный фон */
-    display: flex;
-    justify-content: center;      /* центрируем по горизонтали */
-    align-items: center;          /* центрируем по вертикали */
-    opacity: 0;                   /* начальная непрозрачность (скрыто) */
-    pointer-events: none;         /* окно не реагирует на клики, когда не активно */
-    transition: 0.5s;             /* плавное появление */
-  }
-  
-  /* Когда модальное окно активно */
-  .modal.active {
-    opacity: 1;                  /* делаем окно видимым */
-    pointer-events: all;         /* окно становится интерактивным */
-  }
-  
-  /* Стиль для контента модального окна */
-  .modal-content {
-    background: #2d3748;         /* основной фон контента */
-    padding: 20px;
-    border-radius: 8px;           /* скругление углов */
-    width: 50vw;                  /* ширина окна 50% от ширины экрана */
-    max-width: 600px;             /* максимальная ширина для больших экранов */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* тень для эффекта */
-    transform: scale(0.5);        /* начальный эффект сжатия */
-    transition: 0.4s all;         /* плавное увеличение */
-    display: flex;
-    flex-direction: column;       /* вертикальное выравнивание контента */
-    justify-content: center;      /* выравнивание по вертикали */
-    min-height: 150px;            /* минимальная высота для контента */
-  }
-  
-  /* Когда контент модального окна активен */
-  .modal-content.active {
-    transform: scale(1);          /* анимация увеличения */
-  }
-  
-  /* Заголовок модального окна */
-  .modal-content h2 {
-    color: yellow;                /* цвет текста для заголовка */
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;          /* отступ от текста */
-  }
-  
-  /* Текст в модальном окне */
-  .modal-content p {
-    color: #f7fafc;               /* светлый цвет текста */
-    margin-bottom: 20px;          /* отступ между абзацами */
-  }
-  
-  /* Кнопка закрытия */
-  .modal-content button {
-    background: #2d2d2d;          /* темный фон для кнопки */
-    color: yellow;                /* желтый текст */
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .modal-content button:hover {
-    background-color: #444;       /* темнее при наведении */
-  }
-  
-  
+  position: fixed;              /* фиксированное позиционирование */
+  top: 0;                       /* привязка к верхней части экрана */
+  left: 0;                      /* привязка к левой части экрана */
+  width: 100vw;                 /* ширина на весь экран */
+  height: 100vh;                /* высота на весь экран */
+  background: rgba(0, 0, 0, 0.5); /* полупрозрачный черный фон */
+  display: flex;
+  justify-content: center;      /* центрируем по горизонтали */
+  align-items: center;          /* центрируем по вертикали */
+  opacity: 0;                   /* начальная непрозрачность (скрыто) */
+  pointer-events: none;         /* окно не реагирует на клики, когда не активно */
+  transition: 0.5s;             /* плавное появление */
+}
+
+/* Когда модальное окно активно */
+.modal.active {
+  opacity: 1;                  /* делаем окно видимым */
+  pointer-events: all;         /* окно становится интерактивным */
+}
+
+/* Стиль для контента модального окна */
+.modal-content {
+  background: #2d3748;         /* основной фон контента */
+  padding: 20px;
+  border-radius: 8px;           /* скругление углов */
+  width: 50vw;                  /* ширина окна 50% от ширины экрана */
+  max-width: 600px;             /* максимальная ширина для больших экранов */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* тень для эффекта */
+  transform: scale(0.5);        /* начальный эффект сжатия */
+  transition: 0.4s all;         /* плавное увеличение */
+  display: flex;
+  flex-direction: column;       /* вертикальное выравнивание контента */
+  justify-content: center;      /* выравнивание по вертикали */
+  align-items: center;          /* выравнивание по горизонтали */
+  min-height: 150px;            /* минимальная высота для контента */
+  text-align: center;           /* выравнивание текста по центру */
+}
+
+/* Когда контент модального окна активен */
+.modal-content.active {
+  transform: scale(1);          /* анимация увеличения */
+}
+
+/* Заголовок модального окна */
+.modal-content h2 {
+  color: yellow;                /* цвет текста для заголовка */
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;          /* отступ от текста */
+}
+
+/* Текст в модальном окне */
+.modal-content p {
+  color: #f7fafc;               /* светлый цвет текста */
+  margin-bottom: 20px;          /* отступ между абзацами */
+}
+
+/* Кнопка закрытия */
+.modal-content button {
+  background: #2d2d2d;          /* темный фон для кнопки */
+  color: yellow;                /* желтый текст */
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Эффект наведения на кнопку */
+.modal-content button:hover {
+  background-color: #444;       /* темнее при наведении */
+}
