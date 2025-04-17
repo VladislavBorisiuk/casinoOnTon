@@ -168,11 +168,11 @@ export default function App() {
           Баланс: {balance.toLocaleString()} ₽
         </div>
       </header>
-
-      <main className="flex-1 pt-20 pb-20 flex flex-col items-center justify-start w-full">
+  
+      <main className="flex-1 pt-16 pb-20 flex flex-col items-center justify-start w-full">
         {activeTab === 'game' && (
           <>
-            <div className="relative w-full max-w-3xl overflow-hidden border-y border-gray-500 bg-gray-800 py-8">
+            <div className="fixed top-16 left-0 right-0 z-30 w-full max-w-3xl overflow-hidden border-y border-gray-500 bg-gray-800">
               <RouletteBarVirtual
                 targetNumber={winningNumber ?? 0}
                 rolling={rolling}
@@ -193,7 +193,7 @@ export default function App() {
         {activeTab === 'staking' && <Staking />}
         {activeTab === 'profile' && <Profile username={username} />}
       </main>
-
+  
       <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 py-2 flex border-t border-gray-700 px-4">
         <button onClick={() => setActiveTab('game')} className="flex flex-col items-center text-xs text-yellow-400 font-bold flex-grow text-center">
           🎰<span className="mt-1">Игра</span>
@@ -205,8 +205,9 @@ export default function App() {
           📈<span className="mt-1">Стейкинг</span>
         </button>
       </nav>
-
+  
       <TelegramAuth setUsername={setUsername} setBalance={setBalance} />
     </div>
   );
+  
 }

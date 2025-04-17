@@ -37,7 +37,6 @@ html, body {
   font-size: clamp(18px, 3vw, 28px);
   font-weight: bold;
   text-align: center;
-  margin-bottom: clamp(12px, 2vh, 20px);
   color: #ffcc00;
 }
 
@@ -111,4 +110,41 @@ input:focus {
     max-width: 300px;
     margin: clamp(10px, 2vh, 20px) auto 0;
   }
+}
+.quick-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.quick-buttons button {
+  flex: 1 1 calc(33.333% - 10px);
+  min-width: 80px;
+  padding: 10px 14px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ffcc00, #ffaa00);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.quick-buttons button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px #ffaa00aa;
+}
+
+
+.error-text {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: #888;
 }
