@@ -265,7 +265,7 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
   return (
     <div className="card-pack-container">
       <h2>🃏 Открыть пак карт</h2>
-      <p>Стоимость пака: <strong>100 ₽</strong></p>
+      <p>Стоимость пака: <strong>200 ₽</strong></p>
       
       {/* Отображаем количество карт из максимального */}
       <p>У вас {userCards.length} из 8 карт</p>
