@@ -108,7 +108,6 @@ export default function App() {
     setRolling(false);
     setIsModalOpen(true);
   
-    // Запись в историю ставки
     saveBetToHistory(currentBet, isWinResult, winAmount);
   };
   
@@ -119,26 +118,49 @@ export default function App() {
   ) => {
     const userId = await getUserIdByTelegramId();
     if (!userId) return;
-
+  
+    const getLocalizedBetOption = (bet: Bet): string => {
+      switch (bet.bet.type) {
+        case 'number':
+          return `Число ${bet.bet.value}`;
+        case 'color':
+          switch (bet.bet.value) {
+            case 'red':
+              return 'Красное';
+            case 'black':
+              return 'Чёрное';
+            case 'green':
+              return 'Зелёное';
+          }
+        case 'dozen':
+          switch (bet.bet.value) {
+            case 0:
+              return '1-я дюжина (1–12)';
+            case 1:
+              return '2-я дюжина (13–24)';
+            case 2:
+              return '3-я дюжина (25–32)';
+          }
+        default:
+          return 'Неизвестная ставка';
+      }
+    };
+  
     const { error } = await supabase.from('bets_history').insert({
       user_id: userId,
-      bet_option:
-        bet.bet.type === 'number'
-          ? bet.bet.value.toString()
-          : bet.bet.type === 'color'
-          ? bet.bet.value
-          : `dozen_${bet.bet.value}`,
+      bet_option: getLocalizedBetOption(bet),
       amount: bet.amount,
       result: isWin,
       win_amount: winAmount,
     });
-
+  
     if (error) {
       console.error('Ошибка при сохранении истории ставки:', error);
     } else {
       console.log('Ставка сохранена в историю');
     }
   };
+  
 
   const getUserIdByTelegramId = async (): Promise<string | null> => {
     const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
@@ -185,7 +207,7 @@ export default function App() {
                 triggerSpin={rolling}
               />
             </div>
-            <BetControls onPlaceBet={handlePlaceBet} />
+            <BetControls balance={balance} onPlaceBet={handlePlaceBet} />
             <Modal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}

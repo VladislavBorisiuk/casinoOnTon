@@ -77,8 +77,8 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
-  const [cardToPersistAfterModal, setCardToPersistAfterModal] = useState<Card | null>(null);
   const [collectedProfit, setCollectedProfit] = useState<number | null>(null); // ✅ добавлено
+  const [canOpenPack, setCanOpenPack] = useState(true); // Флаг для проверки, можно ли открыть пак
 
   useEffect(() => {
     const init = async () => {
@@ -115,6 +115,11 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
     }
 
     setUserCards(data || []);
+
+    // Проверка на количество карт
+    if (data && data.length >= 8) {
+      setCanOpenPack(false); // Блокируем возможность открытия паков, если 8 карт
+    }
   };
 
   const updateBalanceInDb = async (newBalance: number) => {
@@ -130,8 +135,8 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
   };
 
   const openPack = async () => {
-    const packCost = 100;
-    if (isOpening || balance < packCost || !userId) return;
+    const packCost = 200;
+    if (isOpening || balance < packCost || !userId || !canOpenPack) return; // Блокируем открытие, если лимит карт достигнут
 
     setIsOpening(true);
 
@@ -139,36 +144,56 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
 
     setSelectedCard(card);
     setIsModalOpen(true);
-    setCardToPersistAfterModal(card);
   };
-
+  const handleRemoveCard = async () => {
+    if (!selectedCard || !userId) return;
+    
+    const { error } = await supabase
+      .from('cards')
+      .delete()
+      .eq('id', selectedCard.id);
+  
+    if (error) {
+      console.error('Ошибка при удалении карты:', error);
+      return;
+    }
+  
+    const refundAmount = selectedCard.currency_income;
+    const newBalance = balance + refundAmount;
+  
+    setBalance(newBalance);
+    updateBalanceInDb(newBalance);
+  
+    await fetchUserCards(userId);
+  
+    setIsModalOpen(false);
+    setSelectedCard(null);  // Обнуляем selectedCard после удаления
+  };
+  
   const handleModalClose = async () => {
     setIsModalOpen(false);
-
-    if (cardToPersistAfterModal && userId) {
-      const { error } = await supabase.from('cards').insert([
-        {
-          ...cardToPersistAfterModal,
-          user_id: userId,
-        },
-      ]);
-
+  
+    if (selectedCard && userId) {
+      const { error } = await supabase.from('cards').insert([{
+        ...selectedCard,
+        user_id: userId,
+      }]);
+  
       if (error) {
         console.error('Ошибка при сохранении карты:', error);
-        alert("Ошибка при сохранении карты");
         setIsOpening(false);
         return;
       }
-
-      const newBalance = balance - 100;
+  
+      const newBalance = balance - 200;
       setBalance(newBalance);
       updateBalanceInDb(newBalance);
-
+  
       await fetchUserCards(userId);
-      setOpenedCards([cardToPersistAfterModal]);
-      setCardToPersistAfterModal(null);
+      setOpenedCards([selectedCard]);
+      setSelectedCard(null);  // Обнуляем selectedCard после сохранения
     }
-
+  
     setIsOpening(false);
   };
 
@@ -235,14 +260,19 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
       <span className="currency">+{card.currency_income}₽</span>
     </div>
   );
+  
 
   return (
     <div className="card-pack-container">
       <h2>🃏 Открыть пак карт</h2>
       <p>Стоимость пака: <strong>100 ₽</strong></p>
+      
+      {/* Отображаем количество карт из максимального */}
+      <p>У вас {userCards.length} из 8 карт</p>
+
       <button
         onClick={openPack}
-        disabled={isOpening || balance < 100}
+        disabled={isOpening || balance < 100 || !canOpenPack} // Блокируем кнопку, если лимит карт достигнут
         className="card-pack-button"
       >
         {isOpening ? "Открываем..." : "Открыть пак"}
@@ -251,18 +281,9 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
       <button
         onClick={collectProfit}
         className="collect-profit-button"
->
+      >
         Собрать прибыль 💸
       </button>
-
-      {openedCards.length > 0 && (
-        <div className="card-result">
-          <h3>🎁 Вам выпала карта:</h3>
-          <div className="card-grid">
-            {openedCards.map(renderCard)}
-          </div>
-        </div>
-      )}
 
       {userCards.length > 0 && (
         <div className="user-cards">
@@ -273,11 +294,13 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
         </div>
       )}
 
-      <ModalCardDrop
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        card={selectedCard}
-      />
+<ModalCardDrop
+  isOpen={isModalOpen}
+  onClose={handleModalClose}
+  card={selectedCard}
+  onRemoveCard={handleRemoveCard} 
+/>
+
 
       {collectedProfit !== null && (
         <ProfitToast amount={collectedProfit} />
@@ -287,3 +310,5 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
 };
 
 export default CardPackOpener;
+
+

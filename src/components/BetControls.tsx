@@ -8,36 +8,44 @@ type BetType =
 
 interface BetControlsProps {
   onPlaceBet: (bet: { amount: number; bet: BetType }) => void;
+  balance: number;
 }
 
-const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet }) => {
+const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet, balance }) => {
   const [betType, setBetType] = useState<'number' | 'color' | 'dozen'>('number');
   const [value, setValue] = useState<number | string>(0);
   const [amount, setAmount] = useState(100);
-  const [error, setError] = useState<string | null>(null);
+  const [betValueError, setBetValueError] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
 
   const handleBetTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newType = e.target.value as 'number' | 'color' | 'dozen';
     setBetType(newType);
-    setError(null);
+    setBetValueError(null);
+
     if (newType === 'number') setValue(0);
     else if (newType === 'color') setValue('red');
-    else setValue(0); // dozen
+    else setValue(0);
   };
 
   const handleSubmit = () => {
-    setError(null);
+    setBetValueError(null);
+    setAmountError(null);
+
+    if (amount < 50) {
+      setAmountError('Минимальная ставка — 50');
+      return;
+    }
 
     if (betType === 'number') {
       const num = Number(value);
       if (isNaN(num) || num < 0 || num > 31) {
-        setError('Введите число от 0 до 31');
+        setBetValueError('Введите число от 0 до 31');
         return;
       }
     }
 
     let betValue: BetType;
-
     if (betType === 'number') {
       betValue = { type: 'number', value: Number(value) };
     } else if (betType === 'color') {
@@ -49,10 +57,28 @@ const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet }) => {
     onPlaceBet({ amount, bet: betValue });
   };
 
-  const quickSetAmount = (val: number) => setAmount(val);
+  const quickSetAmount = (val: number) => {
+    setAmount(val);
+    if (val < 50) setAmountError('Минимальная ставка — 50');
+    else setAmountError(null);
+  };
 
-  // Отключаем кнопку ставки, если есть ошибка или сумма ставки меньше или равна нулю
-  const isBetDisabled = !!(error || amount <= 0);  // Приводим к boolean
+  const quickSetFraction = (fraction: number) => {
+    const numericBalance = Number(balance);
+  
+    if (isNaN(numericBalance)) {
+      setAmountError('Ошибка: некорректный баланс');
+      return;
+    }
+  
+    const val = Math.floor(numericBalance * fraction);
+    setAmount(val);
+    if (val < 50) setAmountError('Минимальная ставка — 50');
+    else setAmountError(null);
+  };
+  
+
+  const isBetDisabled = !!betValueError || !!amountError;
 
   return (
     <div className="bet-controls-wrapper">
@@ -70,29 +96,26 @@ const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet }) => {
 
           {betType === 'number' && (
             <div className="bet-controls-item">
-            <label className="label">Выберите число (0–31)</label>
-            <input
-              type="text"
-              inputMode="numeric" // Подсказка для мобильных устройств, чтобы показывать только цифровую клавиатуру
-              value={value}
-              onChange={(e) => {
-                const val = e.target.value;
-                // Проверяем, что введённое значение состоит только из цифр и в пределах 0-31
-                if (/^\d*$/.test(val)) {
-                  const num = Number(val);
-                  if (val !== "" && num >= 0 && num <= 31) {
-                    setValue(val);  // Сохраняем введённое значение как строку, чтобы не было ведущих нулей
-                    setError(null);
-                  } else {
-                    setValue(val); // В случае выхода за пределы отображаем введённое значение
-                    setError("Введите число от 0 до 31");
+              <label className="label">Выберите число (0–31)</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={value}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^\d*$/.test(val)) {
+                    const num = Number(val);
+                    setValue(val);
+                    if (val !== '' && num >= 0 && num <= 31) {
+                      setBetValueError(null);
+                    } else {
+                      setBetValueError('Введите число от 0 до 31');
+                    }
                   }
-                }
-              }}
-            />
-            {error && <div className="error-text">{error}</div>}
-          </div>
-          
+                }}
+              />
+              {betValueError && <div className="error-text">{betValueError}</div>}
+            </div>
           )}
 
           {betType === 'color' && (
@@ -120,19 +143,31 @@ const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet }) => {
           <div className="bet-controls-item">
             <label className="label">Сумма ставки</label>
             <input
-              type="number"
+              type="text"
               min={1}
               value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setAmount(val);
+                if (val < 50) {
+                  setAmountError('Минимальная ставка — 50');
+                } else {
+                  setAmountError(null);
+                }
+              }}
               placeholder="Сумма"
             />
+            {amountError && <div className="error-text">{amountError}</div>}
             <div className="quick-buttons">
-              <button type="button" onClick={() => quickSetAmount(50)}>50</button>
-              <button type="button" onClick={() => quickSetAmount(100)}>100</button>
-              <button type="button" onClick={() => quickSetAmount(250)}>250</button>
-              <button type="button" onClick={() => quickSetAmount(500)}>500</button>
-              <button type="button" onClick={() => quickSetAmount(1000)}>1000</button>
-              <button type="button" onClick={() => quickSetAmount(2000)}>2000</button>
+              {[50, 100, 250, 500, 1000, 2000, 5000, 10000].map((val) => (
+                <button key={val} className="quick-btn small" onClick={() => quickSetAmount(val)}>
+                  {val}
+                </button>
+              ))}
+              <button className="quick-btn small" onClick={() => quickSetFraction(0.25)}>¼</button>
+              <button className="quick-btn small" onClick={() => quickSetFraction(0.5)}>½</button>
+              <button className="quick-btn small" onClick={() => quickSetFraction(0.75)}>¾</button>
+              <button className="quick-btn small" onClick={() => quickSetFraction(1)}>ALL</button>
             </div>
           </div>
         </div>
@@ -140,7 +175,7 @@ const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet }) => {
         <button
           onClick={handleSubmit}
           className="bet-button"
-          disabled={isBetDisabled}  // Отключаем кнопку, если есть ошибка или сумма ставки меньше или равна нулю
+          disabled={isBetDisabled}
         >
           Сделать ставку
         </button>

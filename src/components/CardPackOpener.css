@@ -191,3 +191,17 @@
         width: 100%;
     }
 }
+
+.btn-remove {
+    background-color: #f44336; /* Красный цвет для кнопки */
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .btn-remove:hover {
+    background-color: #d32f2f; /* Темный красный при наведении */
+  }
+  

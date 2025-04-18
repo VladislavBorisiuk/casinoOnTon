@@ -58,7 +58,7 @@
 }
 
 /* Кнопка закрытия */
-.modal-content button {
+.modal-content .close-button {
   background: #2d2d2d;          /* темный фон для кнопки */
   color: yellow;                /* желтый текст */
   padding: 10px 20px;
@@ -68,7 +68,23 @@
   transition: background-color 0.3s;
 }
 
-/* Эффект наведения на кнопку */
-.modal-content button:hover {
+/* Эффект наведения на кнопку закрытия */
+.modal-content .close-button:hover {
   background-color: #444;       /* темнее при наведении */
+}
+
+/* Кнопка удаления */
+.modal-content .delete-button {
+  background: #e53e3e;          /* красный фон для кнопки удаления */
+  color: white;                 /* белый текст */
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Эффект наведения на кнопку удаления */
+.modal-content .delete-button:hover {
+  background-color: #c53030;    /* темнее при наведении */
 }

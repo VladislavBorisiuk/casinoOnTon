@@ -8,6 +8,7 @@ html, body {
   overflow: hidden;
 }
 
+/* Обёртка вокруг всех контролов */
 .bet-controls-wrapper {
   display: flex;
   justify-content: center;
@@ -18,9 +19,10 @@ html, body {
   padding: clamp(10px, 2vw, 20px);
 }
 
+/* Контейнер для блоков ввода и кнопок */
 .bet-controls-container {
   width: 100%;
-  max-width: 800px; /* Центрирование на больших экранах */
+  max-width: 800px;
   height: 100%;
   background-color: #1a1a1a;
   border-radius: 8px;
@@ -33,6 +35,7 @@ html, body {
   overflow: auto;
 }
 
+/* Заголовок */
 .bet-controls-header {
   font-size: clamp(18px, 3vw, 28px);
   font-weight: bold;
@@ -40,6 +43,7 @@ html, body {
   color: #ffcc00;
 }
 
+/* Обёртка для группы контролов */
 .bet-controls {
   display: flex;
   flex-direction: column;
@@ -47,6 +51,7 @@ html, body {
   flex: 1;
 }
 
+/* Индивидуальные поля */
 .bet-controls-item {
   display: flex;
   flex-direction: column;
@@ -54,12 +59,14 @@ html, body {
   flex: 1;
 }
 
+/* Подписи */
 .label {
   margin-bottom: clamp(4px, 1vh, 8px);
   font-size: clamp(12px, 1.5vw, 14px);
   color: #bbb;
 }
 
+/* Инпуты и селекты */
 select,
 input {
   width: 100%;
@@ -78,6 +85,7 @@ input:focus {
   border-color: #ffcc00;
 }
 
+/* Кнопка "Сделать ставку" */
 .bet-button {
   width: 100%;
   padding: clamp(10px, 2.5vw, 14px);
@@ -96,6 +104,47 @@ input:focus {
   background-color: #f1b800;
 }
 
+/* Быстрые кнопки для ставок */
+.quick-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.quick-buttons button {
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #ffcc00, #ffaa00);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  min-width: 64px;
+  flex: 1 1 calc(25% - 6px);
+  max-width: 80px;
+}
+
+.quick-buttons button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px #ffaa00aa;
+}
+
+/* Сообщения об ошибках */
+.error-text {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* Адаптивные стили */
 @media (min-width: 768px) {
   .bet-controls {
     flex-direction: row;
@@ -110,41 +159,10 @@ input:focus {
     max-width: 300px;
     margin: clamp(10px, 2vh, 20px) auto 0;
   }
-}
-.quick-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
-}
 
-.quick-buttons button {
-  flex: 1 1 calc(33.333% - 10px);
-  min-width: 80px;
-  padding: 10px 14px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #ffcc00, #ffaa00);
-  color: #1a1a1a;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-}
-
-.quick-buttons button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 8px #ffaa00aa;
-}
-
-
-.error-text {
-  color: red;
-  font-size: 0.85rem;
-  margin-top: 4px;
-}
-
-.hint {
-  font-size: 0.75rem;
-  color: #888;
+  .quick-buttons button {
+    font-size: 0.8rem;
+    max-width: 72px;
+    padding: 6px 8px;
+  }
 }
