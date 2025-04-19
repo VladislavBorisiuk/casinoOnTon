@@ -45,6 +45,8 @@ export default function App() {
   const [isWin, setIsWin] = useState(false);
   const [activeTab, setActiveTab] = useState<'game' | 'staking' | 'profile'>('game');
   const [winningNumber, setWinningNumber] = useState<number | null>(null);
+  const [spinTrigger, setSpinTrigger] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(false);
 
   useEffect(() => {
     const initUser = async () => {
@@ -117,6 +119,8 @@ export default function App() {
     setMessage('');
     const number = Math.floor(Math.random() * 33);
     setWinningNumber(number);
+    setSpinTrigger(true);
+    setResetTrigger(false);
   };
 
   const handleRollEnd = (actualNumber: number) => {
@@ -151,59 +155,14 @@ export default function App() {
     setCurrentBet(null);
     setRolling(false);
     setIsModalOpen(true);
-
-    saveBetToHistory(currentBet, isWinResult, winAmount);
+    setSpinTrigger(false);
   };
 
-  const saveBetToHistory = async (
-    bet: any,
-    isWin: boolean,
-    winAmount: number
-  ) => {
-    const userId = await getUserIdByTelegramId();
-    if (!userId) return;
-
-    const getLocalizedBetOption = (bet: any): string => {
-      switch (bet.bet.type) {
-        case 'number':
-          return `Число ${bet.bet.value}`;
-        case 'color':
-          return bet.bet.value === 'red' ? 'Красное' : bet.bet.value === 'black' ? 'Чёрное' : 'Зелёное';
-        case 'dozen':
-          return bet.bet.value === 0 ? '1-я дюжина (1–12)' : bet.bet.value === 1 ? '2-я дюжина (13–24)' : '3-я дюжина (25–32)';
-        default:
-          return 'Неизвестная ставка';
-      }
-    };
-
-    const { error } = await supabase.from('bets_history').insert({
-      user_id: userId,
-      bet_option: getLocalizedBetOption(bet),
-      amount: bet.amount,
-      result: isWin,
-      win_amount: winAmount,
-    });
-
-    if (error) {
-      console.error('Ошибка при сохранении истории ставки:', error);
-    } else {
-      console.log('Ставка сохранена в историю');
-    }
-  };
-
-  const getUserIdByTelegramId = async (): Promise<string | null> => {
-    const telegramId = getTelegramUserId();
-    if (!telegramId) return null;
-    const { data, error } = await supabase
-      .from('users')
-      .select('id')
-      .eq('telegram_id', telegramId)
-      .single();
-    if (error) {
-      console.error('Ошибка при получении user_id:', error);
-      return null;
-    }
-    return data.id;
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setTimeout(() => {
+      setResetTrigger(true);
+    }, 300);
   };
 
   const handlePlaceBet = (bet: any) => {
@@ -230,10 +189,10 @@ export default function App() {
             <div className="fixed top-16 left-0 right-0 z-30 w-full max-w-3xl overflow-hidden border-y border-gray-500 bg-gray-800">
               <RouletteBarVirtual
                 targetNumber={winningNumber ?? 0}
-                rolling={rolling}
+                spinTrigger={spinTrigger}
+                resetTrigger={resetTrigger}
                 onCenterNumberChange={(num) => setResult(num)}
                 onAnimationEnd={(num) => handleRollEnd(num)}
-                triggerSpin={rolling}
               />
             </div>
             <div className="w-full mt-2 flex justify-center">
@@ -244,7 +203,7 @@ export default function App() {
             <BetControls balance={balance} onPlaceBet={handlePlaceBet} />
             <Modal
               isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
+              onClose={handleModalClose}
               message={`Выпал номер ${result}`}
               isWin={isWin}
             />

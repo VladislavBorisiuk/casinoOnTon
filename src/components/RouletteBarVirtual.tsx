@@ -14,17 +14,17 @@ const getColor = (n: number) => {
 interface RouletteBarVirtualProps {
   targetNumber: number;
   onCenterNumberChange: (number: number) => void;
-  rolling: boolean;
   onAnimationEnd: (number: number) => void;
-  triggerSpin: boolean;
+  spinTrigger: boolean;
+  resetTrigger: boolean;
 }
 
 const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
   targetNumber,
   onCenterNumberChange,
-  rolling,
   onAnimationEnd,
-  triggerSpin
+  spinTrigger,
+  resetTrigger,
 }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [visibleCells, setVisibleCells] = useState(DEFAULT_VISIBLE_CELLS);
@@ -32,24 +32,24 @@ const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const offsetRef = useRef(0);
-
-  const cellWidth = containerWidth / visibleCells;
+  const cellWidth = Math.round(containerWidth / visibleCells); // округляем для стабильности
 
   useEffect(() => {
-    const updateDimensions = () => {
-      const width = window.innerWidth;
-      setContainerWidth(width);
-    };
-  
+    const updateDimensions = () => setContainerWidth(window.innerWidth);
     updateDimensions();
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
-  
 
   useEffect(() => {
-    if (!triggerSpin || !rolling) return;
+    if (resetTrigger) {
+      offsetRef.current = 0;
+      setPosition(0);
+    }
+  }, [resetTrigger]);
 
+  useEffect(() => {
+    if (!spinTrigger) return;
     const spinCount = 33 * 4 + targetNumber;
     const targetOffset = offsetRef.current + spinCount * cellWidth;
 
@@ -58,8 +58,7 @@ const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
         offsetRef.current = targetOffset;
         const finalPos = ((targetOffset % (numbers.length * cellWidth)) + (numbers.length * cellWidth)) % (numbers.length * cellWidth);
         setPosition(finalPos);
-
-        const centerIndex = Math.floor((finalPos / cellWidth) + Math.floor(visibleCells / 2)) % extendedNumbers.length;
+        const centerIndex = Math.round((finalPos / cellWidth) + Math.floor(visibleCells / 2)) % extendedNumbers.length;
         const centerNumber = extendedNumbers[centerIndex];
         onCenterNumberChange(centerNumber);
         onAnimationEnd(centerNumber);
@@ -70,7 +69,6 @@ const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
       offsetRef.current = newOffset;
       const newPosition = ((newOffset % (numbers.length * cellWidth)) + (numbers.length * cellWidth)) % (numbers.length * cellWidth);
       setPosition(newPosition);
-
       animationFrameRef.current = requestAnimationFrame(() => animate(newOffset));
     };
 
@@ -79,9 +77,9 @@ const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [triggerSpin, rolling, targetNumber, cellWidth]);
+  }, [spinTrigger, targetNumber, cellWidth]);
 
-  const centerIndex = Math.floor((position / cellWidth) + Math.floor(visibleCells / 2)) % extendedNumbers.length;
+  const centerIndex = Math.round((position / cellWidth) + Math.floor(visibleCells / 2)) % extendedNumbers.length;
   const startIndex = centerIndex - Math.floor(visibleCells / 2);
 
   const visibleNumbers = Array.from({ length: visibleCells }, (_, i) => {
