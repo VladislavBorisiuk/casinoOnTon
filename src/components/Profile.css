@@ -137,9 +137,6 @@ tr:hover td {
   cursor: pointer;
   font-weight: bold;
 }
-.connect-wallet-btn:hover {
-  background-color: #357ee6;
-}
 
   .avatar-img {
     width: 30%;
