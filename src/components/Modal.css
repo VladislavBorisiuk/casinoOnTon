@@ -5,7 +5,7 @@
   left: 0;                      /* привязка к левой части экрана */
   width: 100vw;                 /* ширина на весь экран */
   height: 100vh;                /* высота на весь экран */
-  background: rgba(0, 0, 0, 0.5); /* полупрозрачный черный фон */
+  background:  rgba(0, 0, 0, 0.9);/* более темный полупрозрачный фон */
   display: flex;
   justify-content: center;      /* центрируем по горизонтали */
   align-items: center;          /* центрируем по вертикали */
@@ -22,14 +22,15 @@
 
 /* Стиль для контента модального окна */
 .modal-content {
-  background: #2d3748;         /* основной фон контента */
+  background: #121212;         /* основной темный фон */
   padding: 20px;
-  border-radius: 8px;           /* скругление углов */
+  border-radius: 1rem;         /* скругление углов */
   width: 50vw;                  /* ширина окна 50% от ширины экрана */
-  max-width: 600px;             /* максимальная ширина для больших экранов */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* тень для эффекта */
-  transform: scale(0.5);        /* начальный эффект сжатия */
-  transition: 0.4s all;         /* плавное увеличение */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* мягкая тень */
+  border: 2px solid #ffd70055; /* Приглушенная золотая рамка */
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2); /* Тень с золотистым оттенком */
+  transform: scale(0.9);        /* начальный эффект сжатия */
+  transition: 0.3s all;         /* плавное увеличение */
   display: flex;
   flex-direction: column;       /* вертикальное выравнивание контента */
   justify-content: center;      /* выравнивание по вертикали */
@@ -45,46 +46,52 @@
 
 /* Заголовок модального окна */
 .modal-content h2 {
-  color: yellow;                /* цвет текста для заголовка */
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;          /* отступ от текста */
+  color: #ffd700;                /* золотистый цвет для заголовка */
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;          /* отступ от текста */
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* небольшой тень для текста */
 }
 
 /* Текст в модальном окне */
 .modal-content p {
   color: #f7fafc;               /* светлый цвет текста */
-  margin-bottom: 20px;          /* отступ между абзацами */
+  margin-bottom: 1.5rem;        /* отступ между абзацами */
+  font-size: 1rem;              /* размер шрифта */
 }
 
 /* Кнопка закрытия */
 .modal-content .close-button {
-  background: #2d2d2d;          /* темный фон для кнопки */
-  color: yellow;                /* желтый текст */
-  padding: 10px 20px;
-  border-radius: 5px;
+  background: linear-gradient(45deg, #ffcc00, #ff6600); /* градиент для кнопки */
+  color: #000;                /* черный текст */
+  padding: 12px 24px;
+  border-radius: 0.75rem;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  font-weight: 700;
 }
 
 /* Эффект наведения на кнопку закрытия */
 .modal-content .close-button:hover {
-  background-color: #444;       /* темнее при наведении */
+  transform: scale(1.05);      /* увеличение при наведении */
+  background-color: #ff8c00;   /* более яркий градиент */
 }
 
 /* Кнопка удаления */
 .modal-content .delete-button {
-  background: #e53e3e;          /* красный фон для кнопки удаления */
+  background: #860c0c;          /* красный фон для кнопки удаления */
   color: white;                 /* белый текст */
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 0.75rem;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  font-weight: 700;
 }
 
 /* Эффект наведения на кнопку удаления */
 .modal-content .delete-button:hover {
-  background-color: #c53030;    /* темнее при наведении */
+  transform: scale(1.05);      /* увеличение при наведении */
+  background-color: #671313;    /* темнее при наведении */
 }

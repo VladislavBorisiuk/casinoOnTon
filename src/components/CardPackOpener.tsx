@@ -264,10 +264,8 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
 
   return (
     <div className="card-pack-container">
-      <h2>🃏 Открыть пак карт</h2>
-      <p>Стоимость пака: <strong>200 ₽</strong></p>
+      <h2>Коллекционные карты</h2>
       
-      {/* Отображаем количество карт из максимального */}
       <p>У вас {userCards.length} из 8 карт</p>
 
       <button
@@ -275,7 +273,7 @@ const CardPackOpener: React.FC<Props> = ({ balance, setBalance }) => {
         disabled={isOpening || balance < 100 || !canOpenPack} // Блокируем кнопку, если лимит карт достигнут
         className="card-pack-button"
       >
-        {isOpening ? "Открываем..." : "Открыть пак"}
+        {isOpening ? "Открываем..." : "Открыть пак \n 200₽"}
       </button>
 
       <button

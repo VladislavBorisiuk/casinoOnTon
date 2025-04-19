@@ -1,16 +1,16 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import { supabase } from './backend/supabaseClient';
+import TelegramAuth from './components/TelegramAuth';
 import RouletteBarVirtual from './components/RouletteBarVirtual';
 import BetControls from './components/BetControls';
 import Modal from './components/Modal';
-import { supabase } from './backend/supabaseClient';
-import TelegramAuth from './components/TelegramAuth';
-import Profile from './components/Profile';
 import CardPackOpener from './components/CardPackOpener';
-
-
-
+import casinoChipIcon from './assets/casino_chip.svg';
+import profileIcon from './assets/profile_circle.svg';
+import Profile from './components/Profile';
+import cardIcon from './assets/playing_card.svg';
 
 const getColor = (num: number): 'red' | 'black' | 'green' => {
   if (num === 0) return 'green';
@@ -18,37 +18,81 @@ const getColor = (num: number): 'red' | 'black' | 'green' => {
   return reds.includes(num) ? 'red' : 'black';
 };
 
-type BetType =
-  | { type: 'number'; value: number }
-  | { type: 'color'; value: 'red' | 'black' | 'green' }
-  | { type: 'dozen'; value: 0 | 1 | 2 };
+const getTelegramUserId = () => {
+  const tg = window.Telegram?.WebApp;
+  return tg?.initDataUnsafe?.user?.id?.toString();
+};
 
-interface Bet {
-  amount: number;
-  bet: BetType;
-}
+const getTelegramUsername = () => {
+  const tg = window.Telegram?.WebApp;
+  return tg?.initDataUnsafe?.user?.first_name || null;
+};
+
+const getUserAvatar = () => {
+  const tg = window.Telegram?.WebApp;
+  return tg?.initDataUnsafe?.user?.photo_url;
+};
 
 export default function App() {
+  const [username, setUsername] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number>(1000);
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [rolling, setRolling] = useState(false);
-  const [balance, setBalance] = useState(1000);
   const [result, setResult] = useState<number | null>(null);
   const [message, setMessage] = useState('');
-  const [currentBet, setCurrentBet] = useState<Bet | null>(null);
+  const [currentBet, setCurrentBet] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isWin, setIsWin] = useState(false);
   const [activeTab, setActiveTab] = useState<'game' | 'staking' | 'profile'>('game');
   const [winningNumber, setWinningNumber] = useState<number | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
 
-  
-  const Staking = () => (
-    <CardPackOpener balance={balance} setBalance={setBalance} />
-  );
+  useEffect(() => {
+    const initUser = async () => {
+      const telegramId = getTelegramUserId();
+      const userAvatar = getUserAvatar();
+      const userUsername = getTelegramUsername();
+
+      setAvatar(userAvatar);
+      setUsername(userUsername);
+
+      if (!telegramId) {
+        console.warn("Не удалось получить Telegram ID");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('telegram_id', telegramId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          const { error: insertError } = await supabase.from('users').insert({
+            telegram_id: telegramId,
+            username: userUsername,
+            balance: 1000,
+          });
+          if (insertError) {
+            console.error("Ошибка при создании пользователя:", insertError);
+          } else {
+            console.log("Новый пользователь добавлен");
+            setBalance(1000);
+          }
+        } else {
+          console.error("Ошибка при получении пользователя:", error);
+        }
+      } else {
+        setBalance(data.balance);
+        console.log("Пользователь найден. Баланс:", data.balance);
+      }
+    };
+
+    initUser();
+  }, []);
 
   const updateBalanceInDb = async (newBalance: number) => {
-    const tg = window.Telegram?.WebApp;
-    const telegramId = tg?.initDataUnsafe?.user?.id?.toString();
-
+    const telegramId = getTelegramUserId();
     if (!telegramId) {
       console.warn('Не удалось получить Telegram ID');
       return;
@@ -88,64 +132,50 @@ export default function App() {
       }
       return false;
     })();
-  
+
     setIsWin(isWinResult);
-  
+
     const payoutMultiplier =
       currentBet.bet.type === 'number' ? 32 :
       currentBet.bet.type === 'dozen' ? 3 :
       2;
-      const winAmount = isWinResult ? currentBet.amount * payoutMultiplier : 0;
-  
+    const winAmount = isWinResult ? currentBet.amount * payoutMultiplier : 0;
+
     setBalance(prev => {
       const newBal = prev + winAmount;
-      updateBalanceInDb(newBal);  // Обновление баланса в базе
+      updateBalanceInDb(newBal);
       return newBal;
     });
-  
+
     setResult(actualNumber);
     setCurrentBet(null);
     setRolling(false);
     setIsModalOpen(true);
-  
+
     saveBetToHistory(currentBet, isWinResult, winAmount);
   };
-  
+
   const saveBetToHistory = async (
-    bet: Bet,
+    bet: any,
     isWin: boolean,
     winAmount: number
   ) => {
     const userId = await getUserIdByTelegramId();
     if (!userId) return;
-  
-    const getLocalizedBetOption = (bet: Bet): string => {
+
+    const getLocalizedBetOption = (bet: any): string => {
       switch (bet.bet.type) {
         case 'number':
           return `Число ${bet.bet.value}`;
         case 'color':
-          switch (bet.bet.value) {
-            case 'red':
-              return 'Красное';
-            case 'black':
-              return 'Чёрное';
-            case 'green':
-              return 'Зелёное';
-          }
+          return bet.bet.value === 'red' ? 'Красное' : bet.bet.value === 'black' ? 'Чёрное' : 'Зелёное';
         case 'dozen':
-          switch (bet.bet.value) {
-            case 0:
-              return '1-я дюжина (1–12)';
-            case 1:
-              return '2-я дюжина (13–24)';
-            case 2:
-              return '3-я дюжина (25–32)';
-          }
+          return bet.bet.value === 0 ? '1-я дюжина (1–12)' : bet.bet.value === 1 ? '2-я дюжина (13–24)' : '3-я дюжина (25–32)';
         default:
           return 'Неизвестная ставка';
       }
     };
-  
+
     const { error } = await supabase.from('bets_history').insert({
       user_id: userId,
       bet_option: getLocalizedBetOption(bet),
@@ -153,17 +183,16 @@ export default function App() {
       result: isWin,
       win_amount: winAmount,
     });
-  
+
     if (error) {
       console.error('Ошибка при сохранении истории ставки:', error);
     } else {
       console.log('Ставка сохранена в историю');
     }
   };
-  
 
   const getUserIdByTelegramId = async (): Promise<string | null> => {
-    const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
+    const telegramId = getTelegramUserId();
     if (!telegramId) return null;
     const { data, error } = await supabase
       .from('users')
@@ -177,12 +206,12 @@ export default function App() {
     return data.id;
   };
 
-  const handlePlaceBet = (bet: Bet) => {
+  const handlePlaceBet = (bet: any) => {
     if (bet.amount <= balance) {
       setCurrentBet(bet);
       spin();
     } else {
-      setMessage("Недостаточно средств для ставки");
+      setMessage("Недостаточно средств. Моли ежа о додепе)");
     }
   };
 
@@ -194,7 +223,7 @@ export default function App() {
           Баланс: {balance.toLocaleString()} ₽
         </div>
       </header>
-  
+
       <main className="flex-1 pt-16 pb-20 flex flex-col items-center justify-start w-full">
         {activeTab === 'game' && (
           <>
@@ -207,6 +236,11 @@ export default function App() {
                 triggerSpin={rolling}
               />
             </div>
+            <div className="w-full mt-2 flex justify-center">
+              <div className="text-red-500 text-sm font-medium text-center">
+                {message}
+              </div>
+            </div>
             <BetControls balance={balance} onPlaceBet={handlePlaceBet} />
             <Modal
               isOpen={isModalOpen}
@@ -216,24 +250,37 @@ export default function App() {
             />
           </>
         )}
-        {activeTab === 'staking' && <Staking />}
-        {activeTab === 'profile' && <Profile username={username} />}
+        {activeTab === 'staking' && <CardPackOpener balance={balance} setBalance={setBalance} />}
+        {activeTab === 'profile' && (
+          <Profile username={username} avatar={avatar} />
+        )}
       </main>
-  
-      <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 py-2 flex border-t border-gray-700 px-4">
-        <button onClick={() => setActiveTab('game')} className="flex flex-col items-center text-xs text-yellow-400 font-bold flex-grow text-center">
-          🎰<span className="mt-1">Рулетка</span>
+
+      <nav className="fixed bottom-0 left-0 right-0 bg-gray-800/90 backdrop-blur-md flex border-t border-gray-700 h-12 px-1">
+        <button
+          onClick={() => setActiveTab('game')}
+          className="flex flex-col items-center justify-center text-[9px] text-yellow-400 font-semibold flex-grow"
+        >
+          <img src={casinoChipIcon} alt="Рулетка" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" height={28}/>
+          <span className="mt-0.5">Рулетка</span>
         </button>
-        <button onClick={() => setActiveTab('profile')} className="flex flex-col items-center text-xs text-yellow-400 font-bold flex-grow text-center">
-          👤<span className="mt-1">Профиль</span>
+
+        <button
+          onClick={() => setActiveTab('profile')}
+          className="flex flex-col items-center justify-center text-[9px] text-yellow-400 font-semibold flex-grow"
+        >
+          <img src={profileIcon} alt="Профиль" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" height={28}/>
+          <span className="mt-0.5">Профиль</span>
         </button>
-        <button onClick={() => setActiveTab('staking')} className="flex flex-col items-center text-xs text-yellow-400 font-bold flex-grow text-center">
-          📈<span className="mt-1">Стейкинг</span>
+
+        <button
+          onClick={() => setActiveTab('staking')}
+          className="flex flex-col items-center justify-center text-[9px] text-yellow-400 font-semibold flex-grow"
+        >
+          <img src={cardIcon} alt="Стейкинг" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" height={28}/>
+          <span className="mt-0.5">Коллекция</span>
         </button>
       </nav>
-  
-      <TelegramAuth setUsername={setUsername} setBalance={setBalance} />
     </div>
   );
-  
 }

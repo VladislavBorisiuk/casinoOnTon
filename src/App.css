@@ -3,9 +3,9 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: auto;
-  background-color: #1a202c; /* Темный фон */
+  background-color: #121212; /* Черный фон */
   font-family: 'Roboto', sans-serif;
-  color: #e2e8f0; /* Светлый цвет текста */
+  color: #e0e0e0; /* Светлый цвет текста */
 }
 
 /* Основной контейнер приложения */
@@ -15,8 +15,8 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #1a202c; /* Темный фон */
-  color: #e2e8f0; /* Светлый цвет текста */
+  background-color: #121212; /* Черный фон */
+  color: #e0e0e0; /* Светлый цвет текста */
 }
 
 /* Центрирование основного контента */
@@ -29,7 +29,7 @@ main {
   padding-bottom: 5rem;
   flex-grow: 1;
   width: 100%;
-  color: #e2e8f0; /* Светлый цвет текста */
+  color: #e0e0e0; /* Светлый цвет текста */
 }
 
 /* Шапка и навигация */
@@ -39,20 +39,20 @@ header {
   left: 0;
   right: 0;
   height: auto; /* Высота заголовка */
-  background-color: #2d3748; /* Темно-серый фон */
+  background-color: #1f1f1f; /* Еще темнее фон */
   padding: 0 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
   z-index: 10;
-  color: #e2e8f0; /* Светлый цвет текста */
+  color: #e0e0e0; /* Светлый цвет текста */
 }
 
 header h1 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #e2e8f0; /* Светлый цвет текста */
+  color: #e0e0e0; /* Светлый цвет текста */
 }
 
 /* Элементы управления ставками */
@@ -60,76 +60,51 @@ header h1 {
   width: 100%;
   max-width: 500px;
   padding: 20px;
+  align-content: center;
   box-sizing: border-box;
-  color: #e2e8f0; /* Светлый цвет текста */
+  color: #e0e0e0; /* Светлый цвет текста */
 }
 
-/* Стили для select */
-.bet-controls select {
-  background-color: #2d2d2d; /* Темный фон */
-  border: 1px solid #444; /* Тёмно-серая граница */
-  color: white; /* Белый текст */
-}
-
-/* Стили для кнопок */
-.bet-controls button {
-  background-color: #3490dc; /* Синий фон */
-  color: white; /* Белый текст */
-  font-size: 1.125rem;
-  padding: 12px 24px;
-  border-radius: 50px;
-  transition: background-color 0.3s;
-  border: none; /* Убираем стандартную обводку */
-}
-
-.bet-controls button:hover {
-  background-color: #2779bd; /* Темно-синий при наведении */
-}
-
-.bet-controls button:focus,
-.bet-controls button:active {
-  outline: none; /* Убираем стандартный фокус */
-  background-color: #2779bd; /* Темно-синий при фокусе и активации */
-  color: white; /* Белый текст при фокусе и активации */
-}
-
-/* Footer с скрытием */
 nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #2d3748; /* Темный фон */
+  background-color: rgba(31, 31, 31, 0.9); /* Черный фон с лёгкой прозрачностью */
   display: flex;
-  justify-content: space-between; /* Распределяем кнопки равномерно */
+  justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #4a5568;
+  border-top: 1px solid #333;
   width: 100%;
   box-sizing: border-box;
+  height: 48px; /* Уменьшенная высота */
+  padding: 0 0.5rem;
+  backdrop-filter: blur(4px); /* Немного размытия для плавности */
 }
 
 nav button {
-  flex-grow: 1; /* Кнопки занимают одинаковую ширину */
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #f6e05e; /* Желтый цвет */
+  color: #fbbf24;
   font-weight: bold;
-  background-color: transparent; /* Прозрачный фон */
+  background-color: transparent;
   border: none;
-  padding: 8px 0;
+  padding: 4px 0; /* Уменьшенный отступ */
+  font-size: 0.875rem;
 }
 
 nav button span {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 nav button:hover {
-  color: #ecc94b; /* Желтый цвет при наведении */
+  color: #fcd34d;
 }
 
 nav button:focus,
 nav button:active {
   outline: none;
-  color: #ecc94b; /* Желтый цвет при фокусе и активации */
+  color: #fcd34d;
 }

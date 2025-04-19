@@ -1,13 +1,13 @@
-// Profile.tsx
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../backend/supabaseClient';
-import './Profile.css'; 
+import './Profile.css';
 
 interface ProfileProps {
   username: string | null;
+  avatar: string | null;
 }
 
-const Profile = ({ username }: ProfileProps) => {
+const Profile = ({ username, avatar }: ProfileProps) => {
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
@@ -35,9 +35,12 @@ const Profile = ({ username }: ProfileProps) => {
 
   return (
     <div className="profile">
-      <h2>Профиль игрока</h2>
-      <p>{username ? `@${username}` : 'Загрузка...'}</p>
+      <div className="flex items-center">
+        {avatar && <img src={avatar} alt="Аватар" className="avatar-img" />      }
+        <p>{username ? `${username}` : 'Загрузка...'}</p>
+      </div>
       <div className="history">
+      <p>История ставок</p>
         <table>
           <thead>
             <tr>

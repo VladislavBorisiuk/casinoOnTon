@@ -83,7 +83,6 @@ const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet, balance }) => {
   return (
     <div className="bet-controls-wrapper">
       <div className="bet-controls-container">
-        <div className="bet-controls-header">Сделайте ставку</div>
         <div className="bet-controls">
           <div className="bet-controls-item">
             <label className="label">Тип ставки</label>
@@ -159,7 +158,7 @@ const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet, balance }) => {
             />
             {amountError && <div className="error-text">{amountError}</div>}
             <div className="quick-buttons">
-              {[50, 100, 250, 500, 1000, 2000, 5000, 10000].map((val) => (
+              {[50, 100, 250, 500, 1000, 2000].map((val) => (
                 <button key={val} className="quick-btn small" onClick={() => quickSetAmount(val)}>
                   {val}
                 </button>
@@ -167,18 +166,17 @@ const BetControls: React.FC<BetControlsProps> = ({ onPlaceBet, balance }) => {
               <button className="quick-btn small" onClick={() => quickSetFraction(0.25)}>¼</button>
               <button className="quick-btn small" onClick={() => quickSetFraction(0.5)}>½</button>
               <button className="quick-btn small" onClick={() => quickSetFraction(0.75)}>¾</button>
-              <button className="quick-btn small" onClick={() => quickSetFraction(1)}>ALL</button>
+              <button className="quick-btn small" onClick={() => {
+  const newAmount = Math.floor(amount * 1.1);
+  setAmount(newAmount);
+  if (newAmount < 50) setAmountError('Минимальная ставка — 50');
+  else setAmountError(null);
+}}>+10%</button>
+              <button className="quick-btn small" onClick={() => quickSetFraction(1)}>ALL IN</button>
+              <button className="quick-btn small" onClick={handleSubmit}>✔</button>
             </div>
           </div>
         </div>
-
-        <button
-          onClick={handleSubmit}
-          className="bet-button"
-          disabled={isBetDisabled}
-        >
-          Сделать ставку
-        </button>
       </div>
     </div>
   );

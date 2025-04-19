@@ -48,7 +48,7 @@ const TelegramAuth = ({ setUsername, setBalance }: Props) => {
     } else {
       console.log('Пользователь найден:', data);
       setUsername(data.username);
-      setBalance(data.balance); // <-- Устанавливаем баланс
+      setBalance(data.balance); 
     }
   };
 
@@ -56,7 +56,7 @@ const TelegramAuth = ({ setUsername, setBalance }: Props) => {
     const { data, error } = await supabase.from('users').insert([{
       telegram_id: telegramId,
       username,
-      balance: 1000, // Стартовый баланс
+      balance: 1000, 
     }]).select().single();
 
     if (error) {
@@ -64,7 +64,7 @@ const TelegramAuth = ({ setUsername, setBalance }: Props) => {
     } else {
       console.log('Пользователь создан:', data);
       setUsername(data.username);
-      setBalance(data.balance); // <-- Устанавливаем стартовый баланс
+      setBalance(data.balance); 
     }
   };
 

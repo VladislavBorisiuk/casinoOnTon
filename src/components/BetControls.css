@@ -1,43 +1,32 @@
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  font-family: sans-serif;
-  background-color: #121212;
-  overflow: hidden;
-}
-
 /* Обёртка вокруг всех контролов */
 .bet-controls-wrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center; /* Центрирование по вертикали */
   height: 100%;
   width: 100%;
   box-sizing: border-box;
-  padding: clamp(10px, 2vw, 20px);
+  background-color: transparent; /* Устанавливаем фон для улучшения видимости */
 }
 
 /* Контейнер для блоков ввода и кнопок */
 .bet-controls-container {
   width: 100%;
   max-width: 800px;
-  height: 100%;
-  background-color: #1a1a1a;
-  border-radius: 8px;
-  padding: clamp(10px, 2vw, 20px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  height: auto;
+  background-color: transparent; /* Более тёмный фон */
+  border-radius: 12px; /* Увеличиваем радиус скругления для плавных углов */
   color: white;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  align-items: center; /* Центрируем содержимое */
   overflow: auto;
 }
 
 /* Заголовок */
 .bet-controls-header {
-  font-size: clamp(18px, 3vw, 28px);
+  font-size: clamp(20px, 4vw, 32px);
   font-weight: bold;
   text-align: center;
   color: #ffcc00;
@@ -47,7 +36,7 @@ html, body {
 .bet-controls {
   display: flex;
   flex-direction: column;
-  gap: clamp(8px, 1.5vh, 16px);
+  gap: clamp(12px, 2vh, 18px);
   flex: 1;
 }
 
@@ -55,81 +44,86 @@ html, body {
 .bet-controls-item {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center; /* Центрируем элементы внутри */
   flex: 1;
 }
 
 /* Подписи */
 .label {
-  margin-bottom: clamp(4px, 1vh, 8px);
-  font-size: clamp(12px, 1.5vw, 14px);
+  font-size: clamp(14px, 1.8vw, 16px);
   color: #bbb;
+  text-align: center; /* Центрируем подписи */
 }
 
 /* Инпуты и селекты */
-select,
 input {
   width: 100%;
-  padding: clamp(8px, 2vw, 12px);
-  background-color: #333;
+  padding: clamp(10px, 2.5vw, 14px);
+  background-color: #222;
   color: white;
-  border: 1px solid #555;
-  border-radius: 8px;
+  border-color: #ffaa00;
+  border-radius: 10px; /* Скругление углов */
   font-size: clamp(14px, 2vw, 16px);
   outline: none;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  text-align: center; /* Центрируем текст */
 }
 
-select:focus,
 input:focus {
-  border-color: #ffcc00;
+  border-color: #ffaa00;
+  background-color: #333; /* Меняем фон при фокусе */
 }
 
 /* Кнопка "Сделать ставку" */
 .bet-button {
-  width: 100%;
-  padding: clamp(10px, 2.5vw, 14px);
+  width: auto;
+  padding: clamp(12px, 2.5vw, 16px);
   background-color: #ffcc00;
-  color: #333;
+  color: #1a1a1a;
   font-weight: bold;
-  border-radius: 8px;
-  border: none;
+  border-radius: 10px;
+  border: none; /* Убираем рамку */
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: auto;
-  font-size: clamp(14px, 2vw, 18px);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-top: 20px; /* Добавляем отступ сверху */
+  font-size: clamp(16px, 2vw, 20px);
+  text-align: center;
 }
 
 .bet-button:hover {
-  background-color: #f1b800;
+  background-color: #ffb500; /* Более тёплый оттенок при наведении */
+  color: white;
 }
 
-/* Быстрые кнопки для ставок */
 .quick-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 столбца */
+  grid-template-rows: repeat(4, auto);   /* 4 строки */
+  gap: 12px;
+  margin-top: 12px;
+  justify-items: center;
 }
+
 
 .quick-buttons button {
-  padding: 6px 10px;
-  background: linear-gradient(135deg, #ffcc00, #ffaa00);
-  color: #1a1a1a;
+  padding: 8px 14px;
+  background-color: #ffcc00;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  color: #1a1a1a;
+  border-radius: 10px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-  min-width: 64px;
-  flex: 1 1 calc(25% - 6px);
-  max-width: 80px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  min-width: 72px;
+  flex: 1 1 calc(25% - 12px);
+  max-width: 100px;
 }
 
 .quick-buttons button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 8px #ffaa00aa;
+  background-color: #ffb500;
+  color: white;
+  transform: scale(1.1); /* Легкое увеличение кнопки */
 }
 
 /* Сообщения об ошибках */
@@ -156,13 +150,14 @@ input:focus {
   }
 
   .bet-button {
+    width: auto;
     max-width: 300px;
-    margin: clamp(10px, 2vh, 20px) auto 0;
+    margin: 20px auto 0;
   }
 
   .quick-buttons button {
-    font-size: 0.8rem;
-    max-width: 72px;
-    padding: 6px 8px;
+    font-size: 0.9rem;
+    max-width: 90px;
+    padding: 8px 12px;
   }
 }

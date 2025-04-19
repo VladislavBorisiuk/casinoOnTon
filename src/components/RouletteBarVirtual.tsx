@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './ComponentsStyles.css';
 
-const SLOT_WIDTH = 60;
 const numbers = Array.from({ length: 33 }, (_, i) => i);
 const extendedNumbers = [...numbers, ...numbers, ...numbers];
-const VISIBLE_CELLS = 9;
-const CENTER_INDEX = Math.floor(VISIBLE_CELLS / 2);
+const DEFAULT_VISIBLE_CELLS = 9;
 
 const getColor = (n: number) => {
   if (n === 0) return 'green';
@@ -28,25 +26,41 @@ const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
   onAnimationEnd,
   triggerSpin
 }) => {
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [visibleCells, setVisibleCells] = useState(DEFAULT_VISIBLE_CELLS);
   const [position, setPosition] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const offsetRef = useRef(0);
+
+  const cellWidth = containerWidth / visibleCells;
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      const width = window.innerWidth;
+      setContainerWidth(width);
+    };
+  
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+  
 
   useEffect(() => {
     if (!triggerSpin || !rolling) return;
 
     const spinCount = 33 * 4 + targetNumber;
-    const targetOffset = offsetRef.current + spinCount * SLOT_WIDTH;
+    const targetOffset = offsetRef.current + spinCount * cellWidth;
 
     const animate = (currentOffset: number) => {
-      if (Math.abs(currentOffset - targetOffset) < SLOT_WIDTH) {
+      if (Math.abs(currentOffset - targetOffset) < cellWidth) {
         offsetRef.current = targetOffset;
-        const finalPosition = ((targetOffset % (numbers.length * SLOT_WIDTH)) + (numbers.length * SLOT_WIDTH)) % (numbers.length * SLOT_WIDTH);
-        setPosition(finalPosition);
+        const finalPos = ((targetOffset % (numbers.length * cellWidth)) + (numbers.length * cellWidth)) % (numbers.length * cellWidth);
+        setPosition(finalPos);
 
-        const centerIndex = Math.floor((finalPosition / SLOT_WIDTH) + CENTER_INDEX) % extendedNumbers.length;
+        const centerIndex = Math.floor((finalPos / cellWidth) + Math.floor(visibleCells / 2)) % extendedNumbers.length;
         const centerNumber = extendedNumbers[centerIndex];
-
         onCenterNumberChange(centerNumber);
         onAnimationEnd(centerNumber);
         return;
@@ -54,7 +68,7 @@ const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
 
       const newOffset = currentOffset + (targetOffset - currentOffset) * 0.1;
       offsetRef.current = newOffset;
-      const newPosition = ((newOffset % (numbers.length * SLOT_WIDTH)) + (numbers.length * SLOT_WIDTH)) % (numbers.length * SLOT_WIDTH);
+      const newPosition = ((newOffset % (numbers.length * cellWidth)) + (numbers.length * cellWidth)) % (numbers.length * cellWidth);
       setPosition(newPosition);
 
       animationFrameRef.current = requestAnimationFrame(() => animate(newOffset));
@@ -65,25 +79,28 @@ const RouletteBarVirtual: React.FC<RouletteBarVirtualProps> = ({
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [triggerSpin, rolling, targetNumber]);
+  }, [triggerSpin, rolling, targetNumber, cellWidth]);
 
-  const centerIndex = Math.floor((position / SLOT_WIDTH) + CENTER_INDEX) % extendedNumbers.length;
-  const startIndex = centerIndex - CENTER_INDEX;
+  const centerIndex = Math.floor((position / cellWidth) + Math.floor(visibleCells / 2)) % extendedNumbers.length;
+  const startIndex = centerIndex - Math.floor(visibleCells / 2);
 
-  const visibleNumbers = Array.from({ length: VISIBLE_CELLS }, (_, i) => {
+  const visibleNumbers = Array.from({ length: visibleCells }, (_, i) => {
     const index = (startIndex + i + extendedNumbers.length) % extendedNumbers.length;
     return extendedNumbers[index];
   });
 
   return (
-    <div className="roulette-bar-wrapper">
-      <div className="roulette-frame" />
-      <div className="roulette-bar" style={{ transform: `translateX(-${position % SLOT_WIDTH}px)` }}>
+    <div className="roulette-bar-wrapper" ref={containerRef}>
+      <div className="roulette-frame" style={{ width: `${cellWidth}px` }} />
+      <div
+        className="roulette-bar"
+        style={{ transform: `translateX(-${position % cellWidth}px)` }}
+      >
         {visibleNumbers.map((num, idx) => (
           <div
             key={`${num}-${idx}`}
             className={`roulette-cell ${getColor(num)}`}
-            style={{ width: SLOT_WIDTH }}
+            style={{ width: `${cellWidth}px` }}
           >
             {num}
           </div>

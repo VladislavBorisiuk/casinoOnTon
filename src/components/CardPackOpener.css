@@ -1,46 +1,44 @@
 .card-pack-container {
     width: 100%;
     max-width: 28rem;
-    margin: 2.5rem auto;
-    text-align: center;
     padding: 1.5rem;
-    background-color: #2d2a2a; /* Темный фон с винтажным оттенком */
+    background-color: transparent; /* Темный фон */
     border-radius: 1rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
+    text-align: center;
     box-sizing: border-box;
 }
 
 .card-pack-container h2 {
     font-size: 2rem;
     font-weight: 700;
-    color: #ffd700; /* Золотистый цвет для казино */
+    color: #ffd700; /* Золотой текст */
     margin-bottom: 1rem;
 }
 
 .card-pack-container p {
-    color: #fff;
-    margin-bottom: 1rem;
+    color: #ccc;
     font-size: 1.125rem;
+    margin-bottom: 1rem;
 }
 
 .card-pack-button {
-    background-color: #ff4500; /* Красный для кнопки, напоминающий о казино */
-    color: #fff;
+    background: linear-gradient(45deg, #ffcc00, #ff6600); /* Казино градиент */
+    color: #000;
     font-weight: 700;
     padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    transition: background-color 0.3s ease;
     border: none;
+    border-radius: 0.75rem;
     cursor: pointer;
+    transition: transform 0.2s ease;
 }
 
 .card-pack-button:hover {
-    background-color: #ff6347; /* Легкий оранжевый оттенок при наведении */
+    transform: scale(1.05);
 }
 
 .card-pack-button:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .card-result {
@@ -50,7 +48,7 @@
 .card-result h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #ffd700; /* Золотистый акцент */
+    color: #ffd700;
     margin-bottom: 0.5rem;
 }
 
@@ -64,92 +62,42 @@
 }
 
 .card {
-    background: linear-gradient(90deg, #2e7d32, #388e3c); /* Зелёный градиент */
-    border: 2px solid #1b5e20; /* Темно-зеленая кайма */
+    background: radial-gradient(circle, #1e1e2f 0%, #121212 100%);
+    border: 2px solid #ffd70055;
     border-radius: 1rem;
     padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.15);
     text-align: center;
     font-size: 0.875rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 120px; /* Установите фиксированную ширину для всех карт */
-    height: auto;
+    width: 120px;
     min-height: 120px;
-    transition: transform 0.3s ease;
     transform: scale(0.95);
+    transition: transform 0.3s ease, border 0.3s ease;
     box-sizing: border-box;
 }
 
-.profit-toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(to right, #ffe600, #ff9900);
-    color: #000;
-    padding: 12px 24px;
-    border-radius: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    font-weight: bold;
-    z-index: 1000;
-    animation: fadeSlide 3s ease-in-out;
-  }
-  
-  @keyframes fadeSlide {
-    0% {
-      opacity: 0;
-      transform: translateX(-50%) translateY(20px);
-    }
-    10% {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    90% {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-20px);
-    }
-  }
-  
-
-.collect-profit-button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  
-  .collect-profit-button:hover {
-    background-color: #218838;
-  }
-  
-
 .card:hover {
     transform: scale(1);
+    border-color: #ffd700aa;
 }
 
 .card span {
-    color: #fff;
+    color: #f0f0f0;
 }
 
 .card .rank {
     font-size: 1.5rem;
     font-weight: 700;
     text-transform: capitalize;
+    color: #ffdd57;
 }
 
 .card .suit {
     font-size: 1rem;
-    color: #c8e6c9; /* Светлый кремовый оттенок для масти */
+    color: #aaa;
     text-transform: capitalize;
 }
 
@@ -157,7 +105,7 @@
     margin-top: 0.5rem;
     font-size: 1rem;
     font-weight: 600;
-    color: #fff; /* Зеленый цвет для отображения дохода */
+    color: #00ffcc;
 }
 
 .user-cards {
@@ -168,19 +116,80 @@
 .user-cards h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #ffd700; /* Золотистый для заголовка */
+    color: #ffd700;
     margin-bottom: 1rem;
 }
 
-.user-cards .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+.collect-profit-button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #00ff99, #009966);
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
+.collect-profit-button:hover {
+    transform: scale(1.05);
+}
+
+.btn-remove {
+    background-color: #c0392b;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-remove:hover {
+    background-color: #a93226;
+}
+
+.profit-toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, #ffd700, #ff8c00);
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(255,215,0,0.4);
+    font-weight: bold;
+    z-index: 1000;
+    animation: fadeSlide 3s ease-in-out;
+}
+
+@keyframes fadeSlide {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    90% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
     .card-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
-        width: 100%;
     }
 }
 
@@ -188,20 +197,5 @@
     .card-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
-        width: 100%;
     }
 }
-
-.btn-remove {
-    background-color: #f44336; /* Красный цвет для кнопки */
-    color: white;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  
-  .btn-remove:hover {
-    background-color: #d32f2f; /* Темный красный при наведении */
-  }
-  
