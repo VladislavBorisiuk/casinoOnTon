@@ -70,18 +70,17 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         {avatar && <img src={avatar} alt="Аватар" className="avatar-img" />}
         <p>{username ? username : 'Загрузка...'}</p>
       </div>
-
-      <div className="wallet-section mt-4">
+      <div className="wallet-section mt-4 flex flex-col items-center">
   {wallet?.account?.address ? (
     <>
-      <p className="text-sm text-gray-500 mb-1">Подключенный кошелёк:</p>
-      <div className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg">
+      <p className="text-sm text-gray-500 mb-2">Подключенный кошелёк:</p>
+      <div className="flex items-center justify-center gap-3 bg-gray-100 px-4 py-2 rounded-lg">
         <span className="font-mono">{shortenAddress(wallet.account.address)}</span>
         <button
-  onClick={() => tonConnectUI.openModal()}
-  className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs flex items-center justify-center"
-  title="Отключить или сменить"
->
+          onClick={() => tonConnectUI.openModal()}
+          className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs flex items-center justify-center"
+          title="Отключить или сменить"
+        >
           ×
         </button>
       </div>
@@ -92,6 +91,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
     </button>
   )}
 </div>
+
 
 
       <div className="history">
