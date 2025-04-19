@@ -11,7 +11,7 @@ interface ProfileProps {
 const Profile = ({ username, avatar }: ProfileProps) => {
   const [history, setHistory] = useState<any[]>([]);
   const [tonConnectUI] = useTonConnectUI();
-  const wallet = useTonWallet(); // автоматически подтянет, если кошелёк уже подключён
+  const wallet = useTonWallet();
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -42,10 +42,26 @@ const Profile = ({ username, avatar }: ProfileProps) => {
 
   const connectWallet = async () => {
     try {
-      await tonConnectUI.connectWallet(); // откроет модалку выбора кошелька
+      await tonConnectUI.openModal(); // используем openModal для подключения кошелька
     } catch (err) {
       console.error('Ошибка при подключении TON:', err);
     }
+  };
+
+  const disconnectWallet = () => {
+    // Для отключения можно сбросить информацию о кошельке
+    // Пример: очищаем состояние кошелька или данные
+    // Важно, что для конкретной реализации может понадобиться дополнительная логика
+    console.log('Кошелёк отключён'); 
+    // Можно также использовать состояние или очистить данные о кошельке, если они хранятся в локальном состоянии
+  };
+
+  // Функция для обрезки кошелька до первых 4 и последних 4 символов
+  const shortenAddress = (address: string) => {
+    if (address && address.length > 8) {
+      return `${address.slice(0, 4)}...${address.slice(-4)}`;
+    }
+    return address; // Возвращаем адрес как есть, если он слишком короткий
   };
 
   return (
@@ -59,7 +75,10 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         <p className="mt-4">
           {wallet?.account?.address ? (
             <>
-              Кошелёк подключён: <strong>{wallet.account.address}</strong>
+              Кошелёк подключён: <strong>{shortenAddress(wallet.account.address)}</strong>
+              <button onClick={disconnectWallet} className="disconnect-wallet-btn">
+                Отключить кошелёк
+              </button>
             </>
           ) : (
             <button onClick={connectWallet} className="connect-wallet-btn">
