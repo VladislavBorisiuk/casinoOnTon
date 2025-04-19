@@ -66,30 +66,30 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         {avatar && <img src={avatar} alt="Аватар" className="avatar-img" />}
         <p>{username ? username : 'Загрузка...'}</p>
       </div>
-      <div className="wallet-section mt-4 flex flex-col items-center w-full">
-  {wallet?.account?.address ? (
-    <>
-      <p className="text-sm text-gray-500 mb-2 text-center">Подключенный кошелёк:</p>
-      <div className="flex justify-center w-full">
-  <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg">
-    <span className="font-mono">{shortenAddress(wallet.account.address)}</span>
-    <button
-      onClick={disconnectWallet}
-      className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs flex items-center justify-center"
-      title="Отключить или сменить"
-    >
-      ×
-    </button>
+      <div className="wallet-section mt-4 w-full flex justify-center">
+  <div className="flex flex-col items-center">
+    {wallet?.account?.address ? (
+      <>
+        <p className="text-sm text-gray-500 mb-2 text-center">Подключенный кошелёк:</p>
+        <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg">
+          <span className="font-mono">{shortenAddress(wallet.account.address)}</span>
+          <button
+            onClick={disconnectWallet}
+            className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs flex items-center justify-center"
+            title="Отключить или сменить"
+          >
+            ×
+          </button>
+        </div>
+      </>
+    ) : (
+      <button onClick={connectWallet} className="connect-wallet-btn mx-auto">
+        Подключить TON кошелёк
+      </button>
+    )}
   </div>
 </div>
 
-    </>
-  ) : (
-    <button onClick={connectWallet} className="connect-wallet-btn">
-      Подключить TON кошелёк
-    </button>
-  )}
-</div>
 
 
 
