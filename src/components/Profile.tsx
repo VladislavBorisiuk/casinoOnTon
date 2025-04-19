@@ -49,11 +49,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   };
 
   const disconnectWallet = () => {
-    // Для отключения можно сбросить информацию о кошельке
-    // Пример: очищаем состояние кошелька или данные
-    // Важно, что для конкретной реализации может понадобиться дополнительная логика
-    console.log('Кошелёк отключён'); 
-    // Можно также использовать состояние или очистить данные о кошельке, если они хранятся в локальном состоянии
+    tonConnectUI.disconnect();
   };
 
   // Функция для обрезки кошелька до первых 4 и последних 4 символов
@@ -86,7 +82,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       </div>
     </>
   ) : (
-    <button onClick={connectWallet} className="connect-wallet-btn">
+    <button onClick={disconnectWallet} className="connect-wallet-btn">
       Подключить TON кошелёк
     </button>
   )}
