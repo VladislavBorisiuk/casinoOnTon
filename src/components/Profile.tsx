@@ -71,22 +71,28 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         <p>{username ? username : 'Загрузка...'}</p>
       </div>
 
-      <div className="wallet-section">
-        <p className="mt-4">
-          {wallet?.account?.address ? (
-            <>
-              Кошелёк подключён: <strong>{shortenAddress(wallet.account.address)}</strong>
-              <button onClick={disconnectWallet} className="disconnect-wallet-btn">
-                Отключить кошелёк
-              </button>
-            </>
-          ) : (
-            <button onClick={connectWallet} className="connect-wallet-btn">
-              Подключить TON кошелёк
-            </button>
-          )}
-        </p>
+      <div className="wallet-section mt-4">
+  {wallet?.account?.address ? (
+    <>
+      <p className="text-sm text-gray-500 mb-1">Подключенный кошелёк:</p>
+      <div className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg">
+        <span className="font-mono">{shortenAddress(wallet.account.address)}</span>
+        <button
+          onClick={disconnectWallet}
+          className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs flex items-center justify-center"
+          title="Отключить"
+        >
+          ×
+        </button>
       </div>
+    </>
+  ) : (
+    <button onClick={connectWallet} className="connect-wallet-btn">
+      Подключить TON кошелёк
+    </button>
+  )}
+</div>
+
 
       <div className="history">
         <p>История ставок</p>

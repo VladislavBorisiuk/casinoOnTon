@@ -3,7 +3,7 @@
     "name": "Casino",
     "description": "TONConnect",
     "url": "https://telegram-casinoapp.vercel.app", 
-    "iconUrl": "https://telegram-casinoapp.vercel.app/vite.png",
+    "iconUrl": "https://telegram-casinoapp.vercel.app/logo.svg",
     "bridge": {
       "type": "tonconnect",
       "url": "https://bridge.tonapi.io/bridge"
