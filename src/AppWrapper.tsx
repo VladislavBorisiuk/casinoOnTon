@@ -1,7 +1,7 @@
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import App from './App';
 
-const manifestUrl = 'https://telegram-casinoapp.vercel.app/tonconnect-manifest.json';
+const manifestUrl = 'https://telegram-casinoapp.vercel.app//tonconnect-manifest.json';
 
 console.log('[AppWrapper] Loaded AppWrapper with manifest:', manifestUrl);
 
