@@ -61,7 +61,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   };
 
   return (
-    <div className="profile">
+    <div className="profile flex flex-col items-center text-center">
       <div className="flex items-center">
         {avatar && <img src={avatar} alt="Аватар" className="avatar-img" />}
         <p>{username ? username : 'Загрузка...'}</p>
@@ -70,7 +70,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   {wallet?.account?.address ? (
     <>
       <p className="text-sm text-gray-500 mb-2">Подключенный кошелёк:</p>
-      <div className="flex items-center justify-center gap-3 bg-gray-100 px-4 py-2 rounded-lg">
+      <div className="flex items-center justify-center gap-3 bg-gray-100 px-4 py-2 rounded-lg self-center">
         <span className="font-mono">{shortenAddress(wallet.account.address)}</span>
         <button
           onClick={() => disconnectWallet()}
