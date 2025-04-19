@@ -2,7 +2,8 @@
     "manifest_version": "0.1",
     "name": "Casino",
     "description": "TONConnect",
-    "url": "https://telegram-casinoapp.vercel.app/tonconnect-manifest.json", 
+    "url": "https://telegram-casinoapp.vercel.app", 
+    "iconUrl": "https://telegram-casinoapp.vercel.app/vite.png",
     "bridge": {
       "type": "tonconnect",
       "url": "https://bridge.tonapi.io/bridge"
