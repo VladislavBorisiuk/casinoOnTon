@@ -73,7 +73,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       <div className="flex items-center justify-center gap-3 bg-gray-100 px-4 py-2 rounded-lg">
         <span className="font-mono">{shortenAddress(wallet.account.address)}</span>
         <button
-          onClick={() => tonConnectUI.openModal()}
+          onClick={() => disconnectWallet()}
           className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs flex items-center justify-center"
           title="Отключить или сменить"
         >
@@ -82,7 +82,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       </div>
     </>
   ) : (
-    <button onClick={disconnectWallet} className="connect-wallet-btn">
+    <button onClick={connectWallet} className="connect-wallet-btn">
       Подключить TON кошелёк
     </button>
   )}
