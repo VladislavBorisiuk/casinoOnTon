@@ -66,7 +66,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         {avatar && <img src={avatar} alt="Аватар" className="avatar-img" />}
         <p>{username ? username : 'Загрузка...'}</p>
       </div>
-      <div className="wallet-section mt-4 flex flex-col items-center">
+      <div className="wallet-section mt-4 flex flex-col items-center w-full">
   {wallet?.account?.address ? (
     <>
       <p className="text-sm text-gray-500 mb-2 text-center">Подключенный кошелёк:</p>
