@@ -2,7 +2,7 @@
     "manifest_version": "0.1",
     "name": "Casino",
     "description": "TONConnect",
-    "url": "https://735b-195-238-127-205.ngrok-free.app", 
+    "url": "https://telegram-casinoapp.vercel.app/tonconnect-manifest.json", 
     "bridge": {
       "type": "tonconnect",
       "url": "https://bridge.tonapi.io/bridge"
