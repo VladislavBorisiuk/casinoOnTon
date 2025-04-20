@@ -1,5 +1,6 @@
 // TopUpModal.tsx
 import React from 'react';
+import './Modal.css';
 
 interface TopUpModalProps {
   isOpen: boolean;
@@ -21,8 +22,8 @@ const ModalBalanceUpdate: React.FC<TopUpModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-[300px] shadow-lg">
+    <div className={isOpen ? "modal active" : "modal"}>
+      <div className={isOpen ? "modal-content active" : "modal-content"}>
         <h2 className="text-lg font-semibold mb-4">Пополнить баланс</h2>
         <input
           type="number"
