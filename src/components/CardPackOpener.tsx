@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../backend/supabaseClient';
 import './CardPackOpener.css';
-import ModalCardDrop from './ModalCardDrop';
+import ModalCardDrop from './modalWindows/ModalCardDrop';
 import ProfitToast from './ProfitToast';
 
 interface Card {

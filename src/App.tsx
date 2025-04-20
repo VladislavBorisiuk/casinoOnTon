@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { supabase } from './backend/supabaseClient';
-import TelegramAuth from './components/TelegramAuth';
 import RouletteBarVirtual from './components/RouletteBarVirtual';
 import BetControls from './components/BetControls';
 import Modal from './components/modalWindows/Modal';
