@@ -5,7 +5,7 @@ import { supabase } from './backend/supabaseClient';
 import TelegramAuth from './components/TelegramAuth';
 import RouletteBarVirtual from './components/RouletteBarVirtual';
 import BetControls from './components/BetControls';
-import Modal from './components/Modal';
+import Modal from './components/modalWindows/Modal';
 import CardPackOpener from './components/CardPackOpener';
 import casinoChipIcon from './assets/casino_chip.svg';
 import profileIcon from './assets/profile_circle.svg';

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import RouletteBarVirtual from './RouletteBarVirtual';
 import BetControls from './BetControls';
 import React from 'react';
-import Modal from './Modal.tsx'; // Вынеси его в отдельный файл при необходимости
+import Modal from './modalWindows/Modal'; // Вынеси его в отдельный файл при необходимости
 
 const numbers = Array.from({ length: 33 }, (_, i) => i);
 const SLOT_WIDTH = 60;

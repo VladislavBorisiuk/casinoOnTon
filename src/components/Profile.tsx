@@ -1,7 +1,9 @@
+// Profile.tsx
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../backend/supabaseClient';
 import './Profile.css';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import TopUpModal from './modalWindows/ModalBalanceUpdate'; // Подключаем новый компонент
 
 interface ProfileProps {
   username: string | null;
@@ -16,6 +18,8 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [loadingTopUp, setLoadingTopUp] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false); // Добавляем состояние для успешного пополнения
+  const [modalMessage, setModalMessage] = useState(''); // Сообщение для модального окна
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -82,6 +86,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         validUntil: Math.floor(Date.now() / 1000) + 600,
       });
 
+      // Обновляем баланс пользователя в базе данных
       const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
       if (!telegramId) return;
 
@@ -105,14 +110,15 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         return;
       }
 
-      alert('Пополнение прошло успешно!');
-      setShowTopUpModal(false);
-      setTopUpAmount('');
+      setIsSuccess(true);
+      setModalMessage(`Ваш баланс был успешно пополнен на ${tonAmount} TON!`);
     } catch (err) {
       console.error(err);
-      alert('Ошибка при отправке TON');
+      setIsSuccess(false);
+      setModalMessage('Произошла ошибка при пополнении баланса. Попробуйте снова.');
     } finally {
       setLoadingTopUp(false);
+      setShowTopUpModal(false); // Закрытие попапа после завершения операции
     }
   };
 
@@ -182,34 +188,19 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         </table>
       </div>
 
-      {showTopUpModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[300px] shadow-lg">
-            <h2 className="text-lg font-semibold mb-4">Пополнить баланс</h2>
-            <input
-              type="number"
-              min="0"
-              value={topUpAmount}
-              onChange={(e) => setTopUpAmount(e.target.value)}
-              placeholder="Введите сумму в TON"
-              className="w-full mb-4 p-2 border rounded"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowTopUpModal(false)}
-                className="px-3 py-1 bg-gray-300 rounded"
-              >
-                Отмена
-              </button>
-              <button
-                onClick={handleTopUp}
-                className="px-3 py-1 bg-green-500 text-white rounded"
-                disabled={loadingTopUp}
-              >
-                {loadingTopUp ? 'Отправка...' : 'Подтвердить'}
-              </button>
-            </div>
-          </div>
+      {/* Модальное окно пополнения баланса */}
+      <TopUpModal
+        isOpen={showTopUpModal}
+        onClose={() => setShowTopUpModal(false)}
+        topUpAmount={topUpAmount}
+        setTopUpAmount={setTopUpAmount}
+        handleTopUp={handleTopUp}
+        loadingTopUp={loadingTopUp}
+      />
+
+      {modalMessage && (
+        <div className={`mt-4 p-4 rounded-md ${isSuccess ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+          {modalMessage}
         </div>
       )}
     </div>
