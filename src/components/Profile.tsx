@@ -130,7 +130,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   const handleWithdraw = async () => {
     if (!wallet?.account?.address || !withdrawAmount) return;
     setWithdrawing(true);
-
+  
     try {
       const tonAmount = parseFloat(withdrawAmount);
       if (isNaN(tonAmount) || tonAmount <= 0) {
@@ -138,41 +138,53 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         setWithdrawing(false);
         return;
       }
-
+  
       const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
       if (!telegramId) return;
-
+  
+      // Получаем информацию о пользователе из базы данных
       const { data: user, error } = await supabase
         .from('users')
         .select('id, balance')
         .eq('telegram_id', telegramId)
         .single();
-
+  
       if (error || !user) {
         console.error('Ошибка получения пользователя:', error);
         return;
       }
-
-      const nanoAmount = BigInt(String(tonAmount * 1e9));
-      const requiredBalance = tonAmount * 1000;
-
+  
+      const nanoAmount = BigInt(String(tonAmount * 1e9)); // Конвертируем в нанотонны
+      const requiredBalance = tonAmount * 1000; // Необходимо для корректного расчета
+  
+      // Проверяем, есть ли достаточное количество средств на балансе
       if (parseFloat(user.balance) < requiredBalance) {
         alert('Недостаточно средств на балансе');
         return;
       }
-
+  
+      // Адрес пользователя для отправки средств
+      const userAddress = wallet.account.address;
+  
+      // Отправляем транзакцию с Hot Wallet на адрес пользователя
       await tonConnectUI.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 600,
-        messages: [{ address: wallet.account.address, amount: nanoAmount.toString() }],
+        validUntil: Math.floor(Date.now() / 1000) + 600, // Устанавливаем срок действия транзакции (10 минут)
+        messages: [
+          {
+            address: userAddress,  // Адрес пользователя, на который отправляем средства
+            amount: nanoAmount.toString(), // Количество TON в нанотоннах
+          },
+        ],
       });
-
+  
+      // Обновляем баланс пользователя
       const newBalance = parseFloat(user.balance) - requiredBalance;
-
+  
       const { error: updateError } = await supabase
         .from('users')
         .update({ balance: newBalance })
         .eq('id', user.id);
-
+  
       if (updateError) {
         console.error('Ошибка при обновлении баланса после вывода:', updateError);
       } else {
@@ -187,6 +199,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       setShowWithdrawModal(false);
     }
   };
+  
 
   return (
     <div className="profile flex flex-col items-center text-center">
