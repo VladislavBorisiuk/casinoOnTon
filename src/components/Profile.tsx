@@ -1,9 +1,8 @@
-// Profile.tsx
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../backend/supabaseClient';
 import './Profile.css';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import TopUpModal from './modalWindows/ModalBalanceUpdate'; // Подключаем новый компонент
+import BalanceActionModal from './modalWindows/BalanceActionModal';
 
 interface ProfileProps {
   username: string | null;
@@ -16,10 +15,13 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   const wallet = useTonWallet();
 
   const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [loadingTopUp, setLoadingTopUp] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false); // Добавляем состояние для успешного пополнения
-  const [modalMessage, setModalMessage] = useState(''); // Сообщение для модального окна
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -73,16 +75,18 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       if (!wallet?.account?.address || !topUpAmount) return;
 
       const tonAmount = parseFloat(topUpAmount);
-      const amountNano = BigInt(tonAmount * 1e9);
+      if (isNaN(tonAmount) || tonAmount <= 0) {
+        setIsSuccess(false);
+        setModalMessage('Введите корректную сумму для пополнения.');
+        setLoadingTopUp(false);
+        return;
+      }
+
+      const amountNano = BigInt(String(tonAmount * 1e9));
       const destination = 'UQC1dz85b5O8PuD_fh9Axpub0VaDHQNxviAKER6rbmG4KUyC';
 
       await tonConnectUI.sendTransaction({
-        messages: [
-          {
-            address: destination,
-            amount: amountNano.toString(),
-          },
-        ],
+        messages: [{ address: destination, amount: amountNano.toString() }],
         validUntil: Math.floor(Date.now() / 1000) + 600,
       });
 
@@ -97,7 +101,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
 
       if (userError || !user) return;
 
-      const newBalance = (user.balance || 0) + tonAmount * 1000;
+      const newBalance = (parseFloat(user.balance) || 0) + tonAmount * 1000;
 
       const { error: updateError } = await supabase
         .from('users')
@@ -106,18 +110,81 @@ const Profile = ({ username, avatar }: ProfileProps) => {
 
       if (updateError) {
         console.error('Ошибка при обновлении баланса:', updateError);
+        setIsSuccess(false);
+        setModalMessage('Ошибка при обновлении баланса.');
         return;
       }
 
       setIsSuccess(true);
-      setModalMessage(`Ваш баланс был успешно пополнен на ${tonAmount} TON!`);
+      setModalMessage(`Ваш баланс успешно пополнен на ${tonAmount} TON!`);
     } catch (err) {
       console.error(err);
       setIsSuccess(false);
-      setModalMessage('Произошла ошибка при пополнении баланса. Попробуйте снова.');
+      setModalMessage('Ошибка при пополнении баланса. Попробуйте снова.');
     } finally {
       setLoadingTopUp(false);
-      setShowTopUpModal(false); 
+      setShowTopUpModal(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!wallet?.account?.address || !withdrawAmount) return;
+    setWithdrawing(true);
+
+    try {
+      const tonAmount = parseFloat(withdrawAmount);
+      if (isNaN(tonAmount) || tonAmount <= 0) {
+        alert('Введите корректную сумму');
+        setWithdrawing(false);
+        return;
+      }
+
+      const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
+      if (!telegramId) return;
+
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('id, balance')
+        .eq('telegram_id', telegramId)
+        .single();
+
+      if (error || !user) {
+        console.error('Ошибка получения пользователя:', error);
+        return;
+      }
+
+      const nanoAmount = BigInt(String(tonAmount * 1e9));
+      const requiredBalance = tonAmount * 1000;
+
+      if (parseFloat(user.balance) < requiredBalance) {
+        alert('Недостаточно средств на балансе');
+        return;
+      }
+
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [{ address: wallet.account.address, amount: nanoAmount.toString() }],
+      });
+
+      const newBalance = parseFloat(user.balance) - requiredBalance;
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ balance: newBalance })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Ошибка при обновлении баланса после вывода:', updateError);
+      } else {
+        alert(`Успешно отправлено ${tonAmount} TON`);
+      }
+    } catch (err) {
+      console.error('Ошибка при выводе средств:', err);
+      alert('Ошибка при отправке TON. Попробуйте снова.');
+    } finally {
+      setWithdrawing(false);
+      setWithdrawAmount('');
+      setShowWithdrawModal(false);
     }
   };
 
@@ -125,7 +192,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
     <div className="profile flex flex-col items-center text-center">
       <div className="flex items-center">
         {avatar && <img src={avatar} alt="Аватар" className="avatar-img" />}
-        <p>{username ? username : 'Загрузка...'}</p>
+        <p>{username || 'Загрузка...'}</p>
       </div>
 
       <div className="wallet-section mt-4 w-full flex justify-center">
@@ -150,6 +217,16 @@ const Profile = ({ username, avatar }: ProfileProps) => {
                   className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
                 >
                   Пополнить баланс
+                </button>
+              </div>
+
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowWithdrawModal(true)}
+                  disabled={withdrawing}
+                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                >
+                  {withdrawing ? 'Вывод...' : 'Вывести'}
                 </button>
               </div>
             </>
@@ -187,13 +264,27 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         </table>
       </div>
 
-      <TopUpModal
+      <BalanceActionModal
         isOpen={showTopUpModal}
         onClose={() => setShowTopUpModal(false)}
-        topUpAmount={topUpAmount}
-        setTopUpAmount={setTopUpAmount}
-        handleTopUp={handleTopUp}
-        loadingTopUp={loadingTopUp}
+        amount={topUpAmount}
+        setAmount={setTopUpAmount}
+        onConfirm={handleTopUp}
+        loading={loadingTopUp}
+        title="Пополнить баланс"
+        placeholder="Введите сумму для пополнения"
+      />
+
+      <BalanceActionModal
+        isOpen={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        amount={withdrawAmount}
+        setAmount={setWithdrawAmount}
+        onConfirm={handleWithdraw}
+        loading={withdrawing}
+        title="Вывести TON"
+        placeholder="Введите сумму для вывода"
+        confirmLabel="Вывести"
       />
     </div>
   );
