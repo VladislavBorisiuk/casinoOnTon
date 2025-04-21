@@ -74,7 +74,6 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         validUntil: Math.floor(Date.now() / 1000) + 600,
       });
   
-      // Проверка, была ли транзакция успешной
       if (!result?.boc) {
         throw new Error('Транзакция не была выполнена. Повторите попытку позже.');
       }
@@ -90,18 +89,21 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         throw new Error('Не удалось обновить баланс пользователя');
       }
   
-      const { error: insertError } = await supabase.from('transactions').insert([
-        {
-          user_id: user.id,
-          amount: tonAmount,
-          type: 'topup',
-          ton_address: wallet.account.address,
-        },
-      ]);
-  
-      if (insertError) {
-        throw new Error('Ошибка при записи транзакции: ' + insertError.message);
-      }
+      const { error: insertError } = await supabase
+  .from('transactions')
+  .insert([
+    {
+      user_id: user.id,
+      amount: tonAmount,
+      type: 'topup',
+      ton_address: wallet.account.address,
+    },
+  ]);
+
+if (insertError) {
+  throw new Error('Ошибка записи транзакции в базу данных: ' + insertError.message + user.id);
+}
+
   
       setIsSuccess(true);
       setModalMessage(`Баланс пополнен на ${tonAmount} TON`);
