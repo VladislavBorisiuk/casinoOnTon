@@ -30,15 +30,16 @@ const BalanceActionModal: React.FC<BalanceActionModalProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setAmount(value); 
+  
     const numericValue = parseFloat(value);
-
-    if (numericValue < 0.2) {
+    if (!value || numericValue < 0.2) {
       setError('Минимальная сумма — 0.2');
     } else {
       setError('');
-      setAmount(value);
     }
   };
+  
 
   return (
     <div className={isOpen ? 'modal active' : 'modal'}>
