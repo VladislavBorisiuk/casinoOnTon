@@ -99,21 +99,53 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       const tonAmount = parseFloat(withdrawAmount);
       if (isNaN(tonAmount) || tonAmount <= 0) throw new Error('Некорректная сумма');
   
-      await saveTransaction(user.id, tonAmount, 'withdraw', wallet.account.address);
+      const currentBalance = parseFloat(user.balance);
+      const amountInInternalUnits = tonAmount * 1000;
+  
+      if (currentBalance < amountInInternalUnits) {
+        throw new Error('Недостаточно средств на балансе');
+      }
+  
+      const newBalance = currentBalance - amountInInternalUnits;
+  
+      // Обновляем баланс
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ balance: newBalance })
+        .eq('id', user.id);
+  
+      if (updateError) {
+        throw new Error('Не удалось обновить баланс');
+      }
+  
+      // Записываем транзакцию
+      const { error: insertError } = await supabase.from('transactions').insert([
+        {
+          user_id: user.id,
+          amount: tonAmount,
+          type: 'withdraw',
+          ton_address: wallet.account.address,
+        },
+      ]);
+  
+      if (insertError) {
+        throw new Error('Ошибка записи транзакции в базу данных');
+      }
   
       alert(
         'Транзакция в обработке, это может занять несколько минут.\n\n' +
         'Если средства не поступили в течение 10 минут, обратитесь к @ArtemSverdlovtg для устранения проблемы.'
       );
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Ошибка при оформлении заявки на вывод.');
+      alert(err.message || 'Ошибка при оформлении заявки на вывод.');
     } finally {
       setWithdrawing(false);
       setWithdrawAmount('');
       setShowWithdrawModal(false);
     }
   };
+  
   
 
   useEffect(() => {
