@@ -56,39 +56,65 @@ const Profile = ({ username, avatar }: ProfileProps) => {
     setLoadingTopUp(true);
     try {
       const user = await fetchUserData();
-      if (!user || !wallet?.account?.address || !topUpAmount) return;
-
+      if (!user || !wallet?.account?.address || !topUpAmount) {
+        throw new Error('Не удалось получить данные пользователя или кошелька');
+      }
+  
       const tonAmount = parseFloat(topUpAmount);
-      if (isNaN(tonAmount) || tonAmount <= 0) throw new Error('Некорректная сумма');
-
+      if (isNaN(tonAmount) || tonAmount <= 0) {
+        throw new Error('Некорректная сумма');
+      }
+  
       const amountNano = BigInt(String(tonAmount * 1e9));
       const destination = 'UQC1dz85b5O8PuD_fh9Axpub0VaDHQNxviAKER6rbmG4KUyC';
-
-      await tonConnectUI.sendTransaction({
+  
+      // Отправка TON транзакции
+      const result = await tonConnectUI.sendTransaction({
         messages: [{ address: destination, amount: amountNano.toString() }],
         validUntil: Math.floor(Date.now() / 1000) + 600,
       });
-
+  
+      // Проверка, была ли транзакция успешной
+      if (!result?.boc) {
+        throw new Error('Транзакция не была выполнена. Повторите попытку позже.');
+      }
+  
       const newBalance = (parseFloat(user.balance) || 0) + tonAmount * 1000;
-
-      await supabase
+  
+      const { error: updateError } = await supabase
         .from('users')
         .update({ balance: newBalance })
         .eq('id', user.id);
-
-      await saveTransaction(user.id, tonAmount, 'topup', wallet.account.address);
-
+  
+      if (updateError) {
+        throw new Error('Не удалось обновить баланс пользователя');
+      }
+  
+      const { error: insertError } = await supabase.from('transactions').insert([
+        {
+          user_id: user.id,
+          amount: tonAmount,
+          type: 'topup',
+          ton_address: wallet.account.address,
+        },
+      ]);
+  
+      if (insertError) {
+        throw new Error('Ошибка при записи транзакции: ' + insertError.message);
+      }
+  
       setIsSuccess(true);
       setModalMessage(`Баланс пополнен на ${tonAmount} TON`);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Ошибка пополнения:', err);
       setIsSuccess(false);
-      setModalMessage('Ошибка при пополнении. Попробуйте позже.');
+      setModalMessage(err.message || 'Ошибка при пополнении. Попробуйте позже.');
     } finally {
       setLoadingTopUp(false);
       setShowTopUpModal(false);
     }
   };
+  
 
   const handleWithdraw = async () => {
     setWithdrawing(true);
@@ -129,7 +155,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       ]);
   
       if (insertError) {
-        throw new Error('Ошибка записи транзакции в базу данных '+insertError.message);
+        throw new Error('Ошибка записи транзакции в базу данных '+insertError.message+ user.id);
       }
   
       alert(
