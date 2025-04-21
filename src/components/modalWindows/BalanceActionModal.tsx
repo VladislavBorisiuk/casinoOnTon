@@ -32,13 +32,13 @@ const BalanceActionModal: React.FC<BalanceActionModalProps> = ({
         <h2 className="text-lg font-semibold mb-4">{title}</h2>
         <input
           type="number"
-          min="0"
+          min="0.2"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder={placeholder}
           className="w-full mb-4 p-2 border rounded"
         />
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-4"> {/* Увеличен отступ между кнопками */}
           <button
             onClick={onClose}
             className="px-3 py-1 bg-gray-300 rounded"
