@@ -17,9 +17,20 @@ const getColor = (num: number): 'red' | 'black' | 'green' => {
   return reds.includes(num) ? 'red' : 'black';
 };
 
-const getTelegramUserId = () => window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
-const getTelegramUsername = () => window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || null;
-const getUserAvatar = () => window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url;
+const getTelegramUserId = () => {
+  const tg = window.Telegram?.WebApp;
+  return tg?.initDataUnsafe?.user?.id?.toString();
+};
+
+const getTelegramUsername = () => {
+  const tg = window.Telegram?.WebApp;
+  return tg?.initDataUnsafe?.user?.first_name || null;
+};
+
+const getUserAvatar = () => {
+  const tg = window.Telegram?.WebApp;
+  return tg?.initDataUnsafe?.user?.photo_url;
+};
 
 export default function App() {
   const [username, setUsername] = useState<string | null>(null);
@@ -84,7 +95,11 @@ export default function App() {
 
   const updateBalanceInDb = async (newBalance: number) => {
     const telegramId = getTelegramUserId();
-    if (!telegramId) return;
+    if (!telegramId) {
+      console.warn('Не удалось получить Telegram ID');
+      return;
+    }
+
     const { error } = await supabase
       .from('users')
       .update({ balance: newBalance })
@@ -92,68 +107,90 @@ export default function App() {
 
     if (error) {
       console.error('Ошибка при обновлении баланса:', error);
-    }
-  };
-
-  const generateValidLosingNumber = (bet: any): number => {
-    let attempts = 0;
-    while (true) {
-      const number = Math.floor(Math.random() * 33);
-      const color = getColor(number);
-      const { type, value } = bet.bet;
-
-      const isWin =
-        (type === 'number' && number === value) ||
-        (type === 'color' && color === value) ||
-        (type === 'dozen' &&
-          ((value === 0 && number >= 1 && number <= 12) ||
-           (value === 1 && number >= 13 && number <= 24) ||
-           (value === 2 && number >= 25 && number <= 32)));
-
-      if (!isWin || attempts > 100) return number;
-      attempts++;
+    } else {
+      console.log('Баланс успешно обновлён в БД:', newBalance);
     }
   };
 
   const spin = () => {
     if (rolling || !currentBet || currentBet.amount > balance) return;
+  
     setBalance(prev => prev - currentBet.amount);
     setRolling(true);
     setMessage('');
-
-    const number = wasLastGameWin
-      ? generateValidLosingNumber(currentBet)
-      : Math.floor(Math.random() * 33);
-
+  
+    const number = generateNumberWithRerollIfNeeded(currentBet, wasLastGameWin);
     setWinningNumber(number);
     setSpinTrigger(true);
     setResetTrigger(false);
   };
+  
+  const generateNumberWithRerollIfNeeded = (bet: any, wasPreviousWin: boolean): number => {
+    const roll = () => Math.floor(Math.random() * 33);
+    const number = roll();
+  
+    const isWinning = checkIsWinningNumber(number, bet);
+  
+    // если предыдущая игра была победной и снова выпал победный номер — с шансом 50% рероллим
+    if (wasPreviousWin && isWinning && Math.random() < 0.5) {
+      console.log('Реролл из-за повторной победы после выигрыша');
+      return generateValidLosingNumber(bet);
+    }
+  
+    return number;
+  };
+  
+  const checkIsWinningNumber = (number: number, bet: any): boolean => {
+    const { type, value } = bet.bet;
+    const color = getColor(number);
+  
+    return (
+      (type === 'number' && number === value) ||
+      (type === 'color' && color === value) ||
+      (type === 'dozen' &&
+        ((value === 0 && number >= 1 && number <= 12) ||
+         (value === 1 && number >= 13 && number <= 24) ||
+         (value === 2 && number >= 25 && number <= 32)))
+    );
+  };
+  
+  const generateValidLosingNumber = (bet: any): number => {
+    let attempts = 0;
+    while (true) {
+      const number = Math.floor(Math.random() * 33);
+      if (!checkIsWinningNumber(number, bet)) return number;
+      if (++attempts > 100) return number;
+    }
+  };
+  
 
   const handleRollEnd = (actualNumber: number) => {
     if (!currentBet) return;
-    const { type, value } = currentBet.bet;
-    const color = getColor(actualNumber);
-
-    const isWinResult =
-      (type === 'number' && actualNumber === value) ||
-      (type === 'color' && color === value) ||
-      (type === 'dozen' &&
-        ((value === 0 && actualNumber >= 1 && actualNumber <= 12) ||
-         (value === 1 && actualNumber >= 13 && actualNumber <= 24) ||
-         (value === 2 && actualNumber >= 25 && actualNumber <= 32)));
+    const isWinResult = (() => {
+      const { type, value } = currentBet.bet;
+      if (type === 'number') return actualNumber === value;
+      if (type === 'color') return getColor(actualNumber) === value;
+      if (type === 'dozen') {
+        if (value === 0) return actualNumber >= 1 && actualNumber <= 12;
+        if (value === 1) return actualNumber >= 13 && actualNumber <= 24;
+        if (value === 2) return actualNumber >= 25 && actualNumber <= 32;
+      }
+      return false;
+    })();
 
     setIsWin(isWinResult);
     setWasLastGameWin(isWinResult);
-
+    
     const payoutMultiplier =
-      type === 'number' ? 32 : type === 'dozen' ? 3 : 2;
+      currentBet.bet.type === 'number' ? 32 :
+      currentBet.bet.type === 'dozen' ? 3 :
+      2;
     const winAmount = isWinResult ? currentBet.amount * payoutMultiplier : 0;
 
     setBalance(prev => {
-      const newBalance = prev + winAmount;
-      updateBalanceInDb(newBalance);
-      return newBalance;
+      const newBal = prev + winAmount;
+      updateBalanceInDb(newBal);
+      return newBal;
     });
 
     setResult(actualNumber);
@@ -215,7 +252,9 @@ export default function App() {
           </>
         )}
         {activeTab === 'staking' && <CardPackOpener balance={balance} setBalance={setBalance} />}
-        {activeTab === 'profile' && <Profile username={username} avatar={avatar} />}
+        {activeTab === 'profile' && (
+          <Profile username={username} avatar={avatar} />
+        )}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-gray-800/90 backdrop-blur-md flex border-t border-gray-700 h-12 px-1">
@@ -223,24 +262,28 @@ export default function App() {
           onClick={() => setActiveTab('game')}
           className="flex flex-col items-center justify-center text-[9px] text-yellow-400 font-semibold flex-grow"
         >
-          <img src={casinoChipIcon} alt="Рулетка" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" />
+          <img src={casinoChipIcon} alt="Рулетка" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" height={28}/>
           <span className="mt-0.5">Рулетка</span>
         </button>
+
         <button
           onClick={() => setActiveTab('profile')}
           className="flex flex-col items-center justify-center text-[9px] text-yellow-400 font-semibold flex-grow"
         >
-          <img src={profileIcon} alt="Профиль" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" />
+          <img src={profileIcon} alt="Профиль" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" height={28}/>
           <span className="mt-0.5">Профиль</span>
         </button>
+
         <button
           onClick={() => setActiveTab('staking')}
           className="flex flex-col items-center justify-center text-[9px] text-yellow-400 font-semibold flex-grow"
         >
-          <img src={cardIcon} alt="Стейкинг" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" />
+          <img src={cardIcon} alt="Стейкинг" className="w-3 h-3 opacity-60 hover:opacity-100 transition-opacity duration-200" height={28}/>
           <span className="mt-0.5">Коллекция</span>
         </button>
       </nav>
     </div>
   );
 }
+
+
