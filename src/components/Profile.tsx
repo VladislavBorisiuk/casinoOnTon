@@ -86,7 +86,6 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         validUntil: Math.floor(Date.now() / 1000) + 600,
       });
 
-      // Обновляем баланс пользователя в базе данных
       const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
       if (!telegramId) return;
 
@@ -118,7 +117,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       setModalMessage('Произошла ошибка при пополнении баланса. Попробуйте снова.');
     } finally {
       setLoadingTopUp(false);
-      setShowTopUpModal(false); // Закрытие попапа после завершения операции
+      setShowTopUpModal(false); 
     }
   };
 
@@ -188,7 +187,6 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         </table>
       </div>
 
-      {/* Модальное окно пополнения баланса */}
       <TopUpModal
         isOpen={showTopUpModal}
         onClose={() => setShowTopUpModal(false)}
@@ -197,12 +195,6 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         handleTopUp={handleTopUp}
         loadingTopUp={loadingTopUp}
       />
-
-      {modalMessage && (
-        <div className={`mt-4 p-4 rounded-md ${isSuccess ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-          {modalMessage}
-        </div>
-      )}
     </div>
   );
 };
