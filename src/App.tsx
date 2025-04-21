@@ -132,7 +132,7 @@ export default function App() {
     const isWinning = checkIsWinningNumber(number, bet);
   
     // если предыдущая игра была победной и снова выпал победный номер — с шансом 50% рероллим
-    if (wasPreviousWin && isWinning && Math.random() < 0.7) {
+    if (wasPreviousWin && isWinning && Math.random() < 0.65) {
       return generateValidLosingNumber(bet);
     }
   
