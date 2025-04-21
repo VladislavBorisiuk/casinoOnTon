@@ -132,8 +132,7 @@ export default function App() {
     const isWinning = checkIsWinningNumber(number, bet);
   
     // если предыдущая игра была победной и снова выпал победный номер — с шансом 50% рероллим
-    if (wasPreviousWin && isWinning && Math.random() < 0.5) {
-      console.log('Реролл из-за повторной победы после выигрыша');
+    if (wasPreviousWin && isWinning && Math.random() < 0.7) {
       return generateValidLosingNumber(bet);
     }
   
@@ -212,7 +211,7 @@ export default function App() {
       setCurrentBet(bet);
       spin();
     } else {
-      setMessage("Недостаточно средств. Моли ежа о додепе)");
+      setMessage("Недостаточно средств.");
     }
   };
 
