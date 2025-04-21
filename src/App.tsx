@@ -72,13 +72,13 @@ export default function App() {
           const { error: insertError } = await supabase.from('users').insert({
             telegram_id: telegramId,
             username: userUsername,
-            balance: 1000,
+            balance: 0,
           });
           if (insertError) {
             console.error("Ошибка при создании пользователя:", insertError);
           } else {
             console.log("Новый пользователь добавлен");
-            setBalance(1000);
+            setBalance(0);
           }
         } else {
           console.error("Ошибка при получении пользователя:", error);

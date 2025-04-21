@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../backend/supabaseClient';
-import './Profile.css';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import BalanceActionModal from './modalWindows/BalanceActionModal';
+import './Profile.css';
 
 interface ProfileProps {
   username: string | null;
@@ -17,70 +17,49 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
-  const [loadingTopUp, setLoadingTopUp] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [loadingTopUp, setLoadingTopUp] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
-      if (!telegramId) return;
+  const fetchUserData = async () => {
+    const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
+    if (!telegramId) return null;
 
-      const { data: user, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('telegram_id', telegramId)
-        .single();
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, balance')
+      .eq('telegram_id', telegramId)
+      .single();
 
-      if (userError || !user) return;
-
-      const { data: bets, error: betsError } = await supabase
-        .from('bets_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (betsError) return;
-      setHistory(bets);
-    };
-
-    fetchHistory();
-  }, []);
-
-  const connectWallet = async () => {
-    try {
-      await tonConnectUI.openModal();
-    } catch (err) {
-      console.error('Ошибка при подключении TON:', err);
+    if (error || !data) {
+      console.error('Ошибка получения пользователя:', error);
+      return null;
     }
+
+    return data;
   };
 
-  const disconnectWallet = () => {
-    tonConnectUI.disconnect();
-  };
-
-  const shortenAddress = (address: string) => {
-    if (address && address.length > 8) {
-      return `${address.slice(0, 4)}...${address.slice(-4)}`;
-    }
-    return address;
+  const saveTransaction = async (userId: string, amount: number, type: 'topup' | 'withdraw', tonAddress: string) => {
+    await supabase.from('transactions').insert([
+      {
+        user_id: userId,
+        amount,
+        type,
+        ton_address: tonAddress,
+      },
+    ]);
   };
 
   const handleTopUp = async () => {
     setLoadingTopUp(true);
     try {
-      if (!wallet?.account?.address || !topUpAmount) return;
+      const user = await fetchUserData();
+      if (!user || !wallet?.account?.address || !topUpAmount) return;
 
       const tonAmount = parseFloat(topUpAmount);
-      if (isNaN(tonAmount) || tonAmount <= 0) {
-        setIsSuccess(false);
-        setModalMessage('Введите корректную сумму для пополнения.');
-        setLoadingTopUp(false);
-        return;
-      }
+      if (isNaN(tonAmount) || tonAmount <= 0) throw new Error('Некорректная сумма');
 
       const amountNano = BigInt(String(tonAmount * 1e9));
       const destination = 'UQC1dz85b5O8PuD_fh9Axpub0VaDHQNxviAKER6rbmG4KUyC';
@@ -90,37 +69,21 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         validUntil: Math.floor(Date.now() / 1000) + 600,
       });
 
-      const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
-      if (!telegramId) return;
-
-      const { data: user, error: userError } = await supabase
-        .from('users')
-        .select('id, balance')
-        .eq('telegram_id', telegramId)
-        .single();
-
-      if (userError || !user) return;
-
       const newBalance = (parseFloat(user.balance) || 0) + tonAmount * 1000;
 
-      const { error: updateError } = await supabase
+      await supabase
         .from('users')
         .update({ balance: newBalance })
         .eq('id', user.id);
 
-      if (updateError) {
-        console.error('Ошибка при обновлении баланса:', updateError);
-        setIsSuccess(false);
-        setModalMessage('Ошибка при обновлении баланса.');
-        return;
-      }
+      await saveTransaction(user.id, tonAmount, 'topup', wallet.account.address);
 
       setIsSuccess(true);
-      setModalMessage(`Ваш баланс успешно пополнен на ${tonAmount} TON!`);
+      setModalMessage(`Баланс пополнен на ${tonAmount} TON`);
     } catch (err) {
       console.error(err);
       setIsSuccess(false);
-      setModalMessage('Ошибка при пополнении баланса. Попробуйте снова.');
+      setModalMessage('Ошибка при пополнении. Попробуйте позже.');
     } finally {
       setLoadingTopUp(false);
       setShowTopUpModal(false);
@@ -128,71 +91,23 @@ const Profile = ({ username, avatar }: ProfileProps) => {
   };
 
   const handleWithdraw = async () => {
-    if (!wallet?.account?.address || !withdrawAmount) return;
     setWithdrawing(true);
-  
     try {
+      const user = await fetchUserData();
+      if (!user || !wallet?.account?.address || !withdrawAmount) return;
+  
       const tonAmount = parseFloat(withdrawAmount);
-      if (isNaN(tonAmount) || tonAmount <= 0) {
-        alert('Введите корректную сумму');
-        setWithdrawing(false);
-        return;
-      }
+      if (isNaN(tonAmount) || tonAmount <= 0) throw new Error('Некорректная сумма');
   
-      const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
-      if (!telegramId) return;
+      await saveTransaction(user.id, tonAmount, 'withdraw', wallet.account.address);
   
-      // Получаем информацию о пользователе из базы данных
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('id, balance')
-        .eq('telegram_id', telegramId)
-        .single();
-  
-      if (error || !user) {
-        console.error('Ошибка получения пользователя:', error);
-        return;
-      }
-  
-      const nanoAmount = BigInt(String(tonAmount * 1e9)); // Конвертируем в нанотонны
-      const requiredBalance = tonAmount * 1000; // Необходимо для корректного расчета
-  
-      // Проверяем, есть ли достаточное количество средств на балансе
-      if (parseFloat(user.balance) < requiredBalance) {
-        alert('Недостаточно средств на балансе');
-        return;
-      }
-  
-      // Адрес пользователя для отправки средств
-      const userAddress = wallet.account.address;
-  
-      // Отправляем транзакцию с Hot Wallet на адрес пользователя
-      await tonConnectUI.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 600, // Устанавливаем срок действия транзакции (10 минут)
-        messages: [
-          {
-            address: userAddress,  // Адрес пользователя, на который отправляем средства
-            amount: nanoAmount.toString(), // Количество TON в нанотоннах
-          },
-        ],
-      });
-  
-      // Обновляем баланс пользователя
-      const newBalance = parseFloat(user.balance) - requiredBalance;
-  
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ balance: newBalance })
-        .eq('id', user.id);
-  
-      if (updateError) {
-        console.error('Ошибка при обновлении баланса после вывода:', updateError);
-      } else {
-        alert(`Успешно отправлено ${tonAmount} TON`);
-      }
+      alert(
+        'Транзакция в обработке, это может занять несколько минут.\n\n' +
+        'Если средства не поступили в течение 10 минут, обратитесь к @ArtemSverdlovtg для устранения проблемы.'
+      );
     } catch (err) {
-      console.error('Ошибка при выводе средств:', err);
-      alert('Ошибка при отправке TON. Попробуйте снова.');
+      console.error(err);
+      alert('Ошибка при оформлении заявки на вывод.');
     } finally {
       setWithdrawing(false);
       setWithdrawAmount('');
@@ -200,6 +115,38 @@ const Profile = ({ username, avatar }: ProfileProps) => {
     }
   };
   
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const user = await fetchUserData();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('bets_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) return;
+      setHistory(data);
+    };
+
+    fetchHistory();
+  }, []);
+
+  const shortenAddress = (address: string) =>
+    address.length > 8 ? `${address.slice(0, 4)}...${address.slice(-4)}` : address;
+
+  const connectWallet = async () => {
+    try {
+      await tonConnectUI.openModal();
+    } catch (err) {
+      console.error('Ошибка подключения TON:', err);
+    }
+  };
+
+  const disconnectWallet = () => tonConnectUI.disconnect();
 
   return (
     <div className="profile flex flex-col items-center text-center">
@@ -212,39 +159,31 @@ const Profile = ({ username, avatar }: ProfileProps) => {
         <div className="flex flex-col items-center">
           {wallet?.account?.address ? (
             <>
-              <p className="text-sm text-gray-500 mb-2 text-center">Подключенный кошелёк:</p>
+              <p className="text-sm text-gray-500 mb-2 text-center">Подключённый кошелёк:</p>
               <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg">
                 <span className="font-mono">{shortenAddress(wallet.account.address)}</span>
                 <button
                   onClick={disconnectWallet}
                   className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs flex items-center justify-center"
-                  title="Отключить или сменить"
+                  title="Отключить"
                 >
                   ×
                 </button>
               </div>
+              <button onClick={() => setShowTopUpModal(true)} className="btn">
+  Пополнить
+</button>
+<button
+  onClick={() => setShowWithdrawModal(true)}
+  disabled={withdrawing}
+  className="btn withdraw"
+>
+  {withdrawing ? 'Вывод...' : 'Вывести'}
+</button>
 
-              <div className="mt-4">
-                <button
-                  onClick={() => setShowTopUpModal(true)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                >
-                  Пополнить баланс
-                </button>
-              </div>
-
-              <div className="mt-4">
-                <button
-                  onClick={() => setShowWithdrawModal(true)}
-                  disabled={withdrawing}
-                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
-                >
-                  {withdrawing ? 'Вывод...' : 'Вывести'}
-                </button>
-              </div>
             </>
           ) : (
-            <button onClick={connectWallet} className="connect-wallet-btn mx-auto">
+            <button onClick={connectWallet} className="connect-wallet-btn">
               Подключить TON кошелёк
             </button>
           )}
