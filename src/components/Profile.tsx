@@ -129,7 +129,7 @@ const Profile = ({ username, avatar }: ProfileProps) => {
       ]);
   
       if (insertError) {
-        throw new Error('Ошибка записи транзакции в базу данных');
+        throw new Error('Ошибка записи транзакции в базу данных '+insertError);
       }
   
       alert(
