@@ -32,12 +32,6 @@ const BalanceActionModal: React.FC<BalanceActionModalProps> = ({
     const value = e.target.value;
     const numericValue = parseFloat(value);
 
-    if (value === '') {
-      setAmount('');
-      setError('');
-      return;
-    }
-
     if (numericValue < 0.2) {
       setError('Минимальная сумма — 0.2');
     } else {
